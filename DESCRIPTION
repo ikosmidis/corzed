@@ -1,0 +1,21 @@
+Package: corzed
+Title: What the Package Does (one line, title case)
+Version: 0.0.0.9000
+Authors@R: c(person("Ioannis", "Kosmidis", email = "i.kosmidis@ucl.ac.uk", role = c("aut", "cre")),
+	     person("Claudia", "Di Caterina", email = "dicaterina@stats.unipd.it", role = c("aut")))
+Description: WHAT THE PACKAGE DOES (ONE PARAGRAPH).
+Depends: R (>= 3.4.2)
+License: GPL-2 | GPL-3
+Encoding: UTF-8
+LazyData: true
+Suggest: foreach,
+	 betareg
+RoxygenNote: 6.0.1
+Suggests: testthat,
+	  knitr,
+          rmarkdown,
+	  covr,
+	  foreach
+VignetteBuilder: knitr
+URL: https://github.com/ikosmidis/corzed
+BugReports: https://github.com/ikosmidis/corzed/issues

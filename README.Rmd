@@ -1,0 +1,31 @@
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/corzed)](https://cran.r-project.org/package=corzed)
+[![Travis-CI Build Status](https://travis-ci.org/ikosmidis/corzed.svg?branch=master)](https://travis-ci.org/ikosmidis/corzed)
+[![Coverage Status](https://img.shields.io/codecov/c/github/ikosmidis/corzed/master.svg)](https://codecov.io/github/ikosmidis/corzed?branch=master)
+
+---
+output:
+  md_document:
+    variant: markdown_github
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# corzed
+
+The goal of corzed is to ...
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r example}
+## basic example code
+```
