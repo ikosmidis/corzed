@@ -5,7 +5,8 @@
 \title{Generic method for computing location-adjusted Wald statistics for
 the parameters of general models}
 \usage{
-corzed(object, null = 0, adjust = TRUE, which = NULL, n_cores = 1, ...)
+corzed(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE,
+  ...)
 }
 \arguments{
 \item{object}{a fitted model object (e.g. the result of a
@@ -24,9 +25,8 @@ computed? This can be a numeric or character vector.  The
 default (\code{NULL}) is to compute statistics for all
 parameters}
 
-\item{n_cores}{how many cores should be used for the computation of
-the Wald statistic? Default is \code{1} and one core is used
-per parameter}
+\item{parallel}{if \code{TRUE}, the statistics are computed in
+parallel using the backend provided to \code{\link{foreach}}}
 
 \item{...}{further arguments to be passed to or from other methods}
 }
@@ -37,6 +37,14 @@ the parameters of general models
 \details{
 \code{corzed} stands for "cor"rected "zed"-statistic.
 }
+\references{
+Di Caterina C, Kosmidis I (2017). Location-adjusted Wald statistic
+for scalar parameters *arXiv*, **arXiv:1710.11217**
+}
+\seealso{
+\code{\link{corzed}}
+}
 \author{
-Ioannis Kosmidis \email{i.kosmidis@ucl.ac.uk}, Claudia Di Caterina \email{dicaterina@stats.unipd.it}
+Ioannis Kosmidis \email{i.kosmidis@ucl.ac.uk},
+        Claudia Di Caterina \email{dicaterina@stat.unipd.it}
 }

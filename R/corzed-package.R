@@ -33,9 +33,8 @@ NULL
 #'     computed? This can be a numeric or character vector.  The
 #'     default (\code{NULL}) is to compute statistics for all
 #'     parameters
-#' @param n_cores how many cores should be used for the computation of
-#'     the Wald statistic? Default is \code{1} and one core is used
-#'     per parameter
+#' @param parallel if \code{TRUE}, the statistics are computed in
+#'     parallel using the backend provided to \code{\link{foreach}}
 #' @param ... further arguments to be passed to or from other methods
 #'
 #' @details
@@ -53,6 +52,6 @@ NULL
 #' for scalar parameters *arXiv*, **arXiv:1710.11217**
 #'
 #' @export
-corzed <- function(object, null = 0, adjust = TRUE, which = NULL, n_cores = 1, ...) {
+corzed <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE, ...) {
     UseMethod("corzed")
 }

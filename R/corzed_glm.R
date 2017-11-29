@@ -14,14 +14,14 @@
 #'    lot = factor(c(rep(1, 9), rep(2, 9))))
 #'
 #' modML <- glm(conc ~ log(u)*lot, data = clotting, family = Gamma(link="log"))
-#' corzed(modML)
+#' corzed(modML, parallel = TRUE)
 #'
 #' ## Aliasing
 #' modMLo <- glm(conc ~ log(u)*lot + I(2*log(u)), data = clotting, family = Gamma(link="log"))
 #' corzed(modMLo)
 #'
 #' @export
-corzed.glm <- function(object, null = 0, correction = TRUE, ncores = 1, what = NULL,
+corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE,
                        analytical = FALSE, ...) {
     object <- enrich(object, with = c("auxiliary functions", "mle of dispersion"))
     beta <- coef(object, model = "mean")
@@ -29,10 +29,9 @@ corzed.glm <- function(object, null = 0, correction = TRUE, ncores = 1, what = N
     info <- object$auxiliary_functions$information
     no_dispersion <- object$family$family %in% c("poisson", "binomial")
     ## Robustify against aliasing
-    pivots <- object$qr$pivot
-    p <- object$rank
     p_all <- length(beta)
-    beta_ind <- pivots[seq.int(p)]
+    beta_ind <- seq.int(p_all)
+
     ## Compute inverse Fisher information, standard errors and t values
     if (no_dispersion) {
         F_inds <- beta_ind
@@ -46,14 +45,10 @@ corzed.glm <- function(object, null = 0, correction = TRUE, ncores = 1, what = N
     ses <- sqrt(diag(F))[1L:p_all]
     t <- (beta - null)/ses
     ## If no correction return t
-    if (!correction) {
-        if (is.null(what)) {
-            return(t)
-        }
-        else {
-            return(t[what])
-        }
+    if (!adjust) {
+        return(t)
     }
+
     ## Otherwise continue to the computation of the adjustment (need
     ## bias at the mle and information function)
     b <- object$auxiliary_functions$bias(beta, phi)
@@ -77,7 +72,6 @@ corzed.glm <- function(object, null = 0, correction = TRUE, ncores = 1, what = N
         }
     }
     adj_t <- function(j) {
-        ## u and V can be replaced with analytical derivatives if necessary
         u <- numDeriv::grad(kappa, theta, j = j)
         V <- numDeriv::hessian(kappa, theta, j = j)
         a <- -t[j] * u
@@ -86,179 +80,188 @@ corzed.glm <- function(object, null = 0, correction = TRUE, ncores = 1, what = N
             (sum(F * (tcrossprod(a, u)), na.rm = TRUE)/ses[j] +
              0.5 * t[j] * sum(F * V, na.rm = TRUE))/ses[j]
     }
-    adj_t_analytical <- function(j) {
-      # ADD the analytical adjustment here
-      X <- model.matrix(object)
-      family <- enrich(object$family)
-      link <- enrich(make.link(object$family$link))
 
-      etas <- predict(object, type = "link")
-      mus <- predict(object, type = "response")
-      w <- weights(object, type = "working")
-      m <- weights(object, type = "prior")
-
-      d1mus <- link$mu.eta(etas)
-      d2mus <- link$d2mu.deta(etas)
-      d3mus <- link$d3mu.deta(etas)
-      vars <- family$variance(mus)
-      d1vars <- family$d1variance(mus)
-      d2vars <- family$d2variance(mus)
-
-      u_analytical <- function(j) {
-        e <- d2mus/d1mus
-        ## derivative of log variance wrt eta
-        l <- d1vars*d1mus/vars
-        dw <- w*(2*e - l)*X
-        if(no_dispersion) {
-          dinfo <- lapply(seq.int(p_all), function(cov) t(X*dw[, cov])%*%X )
-          dse <- sapply(seq.int(p_all), function(cov) {
-            - 0.5*(diag(F%*%dinfo[[cov]]%*%F))[j]/ses[j]
-          })
-        }
-        else {
-          zeta <- - m/phi
-          d2as <- family$d2afun(zeta)
-          d3as <- family$d3afun(zeta)
-          dinfo_beta11 <- lapply(seq.int(p_all), function(cov) t(X*dw[, cov])%*%X/phi)
-          dinfo_beta <- lapply(seq.int(p_all), function(cov) cbind(rbind(dinfo_beta11[[cov]], rep(0, p_all)), rep(0, p_all + 1)))
-          dse_beta <- sapply(seq.int(p_all), function(cov) {
-            - 0.5*(diag(F%*%dinfo_beta[[cov]]%*%F))[j]/ses[j]
-          })
-          dinfo_phi11 <- - t(X)%*%diag(w)%*%X/phi^2
-          dinfo_phi22 <- sum(m^2*d3as)/(2*phi^6) - 2*sum(m^2*d2as)/phi^5
-          dinfo_phi <- cbind(rbind(dinfo_phi11, rep(0, p_all)), c(rep(0, p_all), dinfo_phi22))
-          dse_phi <- - 0.5*(diag(F%*%dinfo_phi%*%F))[j]/ses[j]
-          dse <- as.vector(c(dse_beta, dse_phi))
-        }
-        dse
-      }
-
-      V_analytical <- function(j) {
-        e <- d2mus/d1mus
-        edash <- (d3mus*d1mus - d2mus^2)/d1mus^2
-        ## derivative of log variance wrt eta
-        l <- d1vars*d1mus/vars
-        ldash <- ((d1vars*d2mus + d2vars*d1mus^2)*vars - d1vars^2*d1mus^2)/vars^2
-        if(no_dispersion) {
-          dinfo <- function(u) {
-            dw <- w*(2*e - l)*X[, u]
-            t(X*dw)%*%X
-          }
-          d2info <- function(u, v) {
-            d2w <- w*(2*e - l)^2*X[, u]*X[, v] +
-              w*(2*edash - ldash)*X[, u]*X[, v]
-            t(X*d2w)%*%X
-          }
-          der2 <- function(u, v) {
-            - 0.25*diag(F%*%dinfo(u)%*%F)[j]*diag(F%*%dinfo(v)%*%F)[j]/ses[j]^3 +
-              0.5*diag(F%*%dinfo(u)%*%F%*%dinfo(v)%*%F)[j]/ses[j] +
-              0.5*diag(F%*%dinfo(v)%*%F%*%dinfo(u)%*%F)[j]/ses[j] -
-              0.5*diag(F%*%d2info(u, v)%*%F)[j]/ses[j]
-          }
-          d2se <- outer(seq.int(p_all), seq.int(p_all), Vectorize(der2))
-        }
-        else {
-          zeta <- - m/phi
-          d2as <- family$d2afun(zeta)
-          d3as <- family$d3afun(zeta)
-          d4as <- family$d4afun(zeta)
-
-          dinfo_beta11 <- function(u) {
-            dw <- w*(2*e - l)*X[, u]
-            t(X * dw)%*%X/phi
-          }
-          dinfo_beta <- function(u) {
-            cbind(rbind(dinfo_beta11(u), rep(0, p_all)), rep(0, p_all + 1))
-          }
-
-          d2info_beta11 <- function(u, v) {
-            d2w <- w*(2*e - l)^2*X[, u]*X[, v] + w*(2*edash - ldash)*X[, u]*X[, v]
-            t(X*d2w)%*%X/phi
-          }
-          d2info_beta <- function(u, v) {
-            cbind(rbind(d2info_beta11(u, v), rep(0, p_all)), rep(0, p_all + 1))
-          }
-
-          d2info_betaphi11 <- function(u) {
-            dw <- w*(2*e - l)*X[, u]
-            - t(X * dw)%*%X/phi^2
-          }
-          d2info_betaphi <- function(u) {
-            cbind(rbind(d2info_betaphi11(u), rep(0, p_all)), rep(0, p_all + 1))
-          }
-
-          dinfo_phi11 <- - t(X)%*%diag(w)%*%X/phi^2
-          dinfo_phi22 <- sum(m^2*d3as)/(2*phi^6) - 2*sum(m^2*d2as)/phi^5
-          dinfo_phi <- cbind(rbind(dinfo_phi11, rep(0, p_all)), c(rep(0, p_all), dinfo_phi22))
-
-          d2info_phi11 <- 2*t(X)%*%diag(w)%*%X/phi^3
-          d2info_phi22 <- 10*sum(m^2*d2as)/phi^6 - 5*sum(m^2*d3as)/phi^7 +
-            0.5*sum(m^2*d4as)/phi^8
-
-          d2info_phi <- cbind(rbind(d2info_phi11, rep(0, p_all)), c(rep(0, p_all),
-                                                                    d2info_phi22))
-          dinfo <- function(u) {
-            if(is.element(u, 1:p_all)) dinfo <- dinfo_beta(u)
-            if(u == p_all + 1) dinfo <- dinfo_phi
-            return(dinfo)
-          }
-
-          d2info <- function(u, v) {
-            if((is.element(u, 1:p_all)) & (is.element(v, 1:p_all))) {
-              d2info <- d2info_beta(u, v)
-            }
-            if((is.element(u, 1:p_all)) & (v == p_all + 1)) {
-              d2info <- d2info_betaphi(u)
-            }
-            if((is.element(v, 1:p_all)) & (u == p_all + 1)) {
-              d2info <- d2info_betaphi(v)
-            }
-            if((u == p_all + 1) & (v == p_all + 1)) {
-              d2info <- d2info_phi
-            }
-            return(d2info)
-          }
-
-          der2 <- function(u, v) {
-            - 0.25*diag(F%*%dinfo(u)%*%F)[j] * diag(F%*%dinfo(v)%*%F)[j]/ses[j]^3 +
-              0.5*diag(F%*%dinfo(u)%*%F%*%dinfo(v)%*%F)[j]/ses[j] +
-              0.5*diag(F%*%dinfo(v)%*%F%*%dinfo(u)%*%F)[j]/ses[j] -
-              0.5*diag(F%*%d2info(u, v)%*%F)[j]/ses[j]
-          }
-          d2se <- outer(seq.int(p_all + 1), seq.int(p_all + 1), Vectorize(der2))
-        }
-        d2se
-      }
-      a <- -t[j] * u_analytical(j)
-      a[j] <- 1 + a[j]
-      t[j] - sum(a * b, na.rm = TRUE)/ses[j] +
-        (sum(F * (tcrossprod(a, u_analytical(j))), na.rm = TRUE)/ses[j] +
-           0.5 * t[j] * sum(F * V_analytical(j), na.rm = TRUE))/ses[j]
+    if (is.null(which)) {
+        which <- seq.int(p_all)
     }
 
+    if (is.character(which)) {
+        beta_names <- names(beta)
+        which <- match(which, beta_names)
+    }
+
+    beta_ind <- beta_ind[which]
+
+    if (any(is.na(beta_ind))) {
+        stop("variable name mismatch")
+    }
+
+
+    beta_ind <- beta_ind[!is.na(t[beta_ind])]
+
+    foreach_object <- eval(as.call(c(list(quote(foreach::foreach), i = beta_ind, .combine = "c"))))
     if (parallel) {
         setup_parallel()
-        foreach_object <- eval(as.call(c(list(quote(foreach::foreach), i = beta_inds))))
-        result <- foreach::`%dopar%`(foreach_object, adj_t_analytical)
-    }
-
-    ## Adjust the t statistics
-    if (is.null(what)) {
-      if(analytical) {
-        t[beta_ind] <- foreach::`%dopar%`(adj_t_analytical, beta_ind, mc.cores = ncores)
-      }
-      else {
-        t[beta_ind] <- parallel::mcmapply(adj_t, beta_ind, mc.cores = ncores)
-      }
-      return(t)
+        t[beta_ind] <- foreach::`%dopar%`(foreach_object, adj_t(i))
     }
     else {
-        if (what > 0 & what <= p_all) {
-          if(analytical) return(adj_t_analytical(what))
-          else return(adj_t(what))
-        }
-        else {
-            stop("invalid what")
-        }
+        t[beta_ind] <- foreach::`%do%`(foreach_object, adj_t(i))
     }
+
+    t[which]
+
 }
+
+
+
+
+
+    ## adj_t_analytical <- function(j) {
+    ##   # ADD the analytical adjustment here
+    ##   X <- model.matrix(object)
+    ##   family <- enrich(object$family)
+    ##   link <- enrich(make.link(object$family$link))
+
+    ##   etas <- predict(object, type = "link")
+    ##   mus <- predict(object, type = "response")
+    ##   w <- weights(object, type = "working")
+    ##   m <- weights(object, type = "prior")
+
+    ##   d1mus <- link$mu.eta(etas)
+    ##   d2mus <- link$d2mu.deta(etas)
+    ##   d3mus <- link$d3mu.deta(etas)
+    ##   vars <- family$variance(mus)
+    ##   d1vars <- family$d1variance(mus)
+    ##   d2vars <- family$d2variance(mus)
+
+    ##   u_analytical <- function(j) {
+    ##     e <- d2mus/d1mus
+    ##     ## derivative of log variance wrt eta
+    ##     l <- d1vars*d1mus/vars
+    ##     dw <- w*(2*e - l)*X
+    ##     if(no_dispersion) {
+    ##       dinfo <- lapply(seq.int(p_all), function(cov) t(X*dw[, cov])%*%X )
+    ##       dse <- sapply(seq.int(p_all), function(cov) {
+    ##         - 0.5*(diag(F%*%dinfo[[cov]]%*%F))[j]/ses[j]
+    ##       })
+    ##     }
+    ##     else {
+    ##       zeta <- - m/phi
+    ##       d2as <- family$d2afun(zeta)
+    ##       d3as <- family$d3afun(zeta)
+    ##       dinfo_beta11 <- lapply(seq.int(p_all), function(cov) t(X*dw[, cov])%*%X/phi)
+    ##       dinfo_beta <- lapply(seq.int(p_all), function(cov) cbind(rbind(dinfo_beta11[[cov]], rep(0, p_all)), rep(0, p_all + 1)))
+    ##       dse_beta <- sapply(seq.int(p_all), function(cov) {
+    ##         - 0.5*(diag(F%*%dinfo_beta[[cov]]%*%F))[j]/ses[j]
+    ##       })
+    ##       dinfo_phi11 <- - t(X)%*%diag(w)%*%X/phi^2
+    ##       dinfo_phi22 <- sum(m^2*d3as)/(2*phi^6) - 2*sum(m^2*d2as)/phi^5
+    ##       dinfo_phi <- cbind(rbind(dinfo_phi11, rep(0, p_all)), c(rep(0, p_all), dinfo_phi22))
+    ##       dse_phi <- - 0.5*(diag(F%*%dinfo_phi%*%F))[j]/ses[j]
+    ##       dse <- as.vector(c(dse_beta, dse_phi))
+    ##     }
+    ##     dse
+    ##   }
+
+    ##   V_analytical <- function(j) {
+    ##     e <- d2mus/d1mus
+    ##     edash <- (d3mus*d1mus - d2mus^2)/d1mus^2
+    ##     ## derivative of log variance wrt eta
+    ##     l <- d1vars*d1mus/vars
+    ##     ldash <- ((d1vars*d2mus + d2vars*d1mus^2)*vars - d1vars^2*d1mus^2)/vars^2
+    ##     if(no_dispersion) {
+    ##       dinfo <- function(u) {
+    ##         dw <- w*(2*e - l)*X[, u]
+    ##         t(X*dw)%*%X
+    ##       }
+    ##       d2info <- function(u, v) {
+    ##         d2w <- w*(2*e - l)^2*X[, u]*X[, v] +
+    ##           w*(2*edash - ldash)*X[, u]*X[, v]
+    ##         t(X*d2w)%*%X
+    ##       }
+    ##       der2 <- function(u, v) {
+    ##         - 0.25*diag(F%*%dinfo(u)%*%F)[j]*diag(F%*%dinfo(v)%*%F)[j]/ses[j]^3 +
+    ##           0.5*diag(F%*%dinfo(u)%*%F%*%dinfo(v)%*%F)[j]/ses[j] +
+    ##           0.5*diag(F%*%dinfo(v)%*%F%*%dinfo(u)%*%F)[j]/ses[j] -
+    ##           0.5*diag(F%*%d2info(u, v)%*%F)[j]/ses[j]
+    ##       }
+    ##       d2se <- outer(seq.int(p_all), seq.int(p_all), Vectorize(der2))
+    ##     }
+    ##     else {
+    ##       zeta <- - m/phi
+    ##       d2as <- family$d2afun(zeta)
+    ##       d3as <- family$d3afun(zeta)
+    ##       d4as <- family$d4afun(zeta)
+
+    ##       dinfo_beta11 <- function(u) {
+    ##         dw <- w*(2*e - l)*X[, u]
+    ##         t(X * dw)%*%X/phi
+    ##       }
+    ##       dinfo_beta <- function(u) {
+    ##         cbind(rbind(dinfo_beta11(u), rep(0, p_all)), rep(0, p_all + 1))
+    ##       }
+
+    ##       d2info_beta11 <- function(u, v) {
+    ##         d2w <- w*(2*e - l)^2*X[, u]*X[, v] + w*(2*edash - ldash)*X[, u]*X[, v]
+    ##         t(X*d2w)%*%X/phi
+    ##       }
+    ##       d2info_beta <- function(u, v) {
+    ##         cbind(rbind(d2info_beta11(u, v), rep(0, p_all)), rep(0, p_all + 1))
+    ##       }
+
+    ##       d2info_betaphi11 <- function(u) {
+    ##         dw <- w*(2*e - l)*X[, u]
+    ##         - t(X * dw)%*%X/phi^2
+    ##       }
+    ##       d2info_betaphi <- function(u) {
+    ##         cbind(rbind(d2info_betaphi11(u), rep(0, p_all)), rep(0, p_all + 1))
+    ##       }
+
+    ##       dinfo_phi11 <- - t(X)%*%diag(w)%*%X/phi^2
+    ##       dinfo_phi22 <- sum(m^2*d3as)/(2*phi^6) - 2*sum(m^2*d2as)/phi^5
+    ##       dinfo_phi <- cbind(rbind(dinfo_phi11, rep(0, p_all)), c(rep(0, p_all), dinfo_phi22))
+
+    ##       d2info_phi11 <- 2*t(X)%*%diag(w)%*%X/phi^3
+    ##       d2info_phi22 <- 10*sum(m^2*d2as)/phi^6 - 5*sum(m^2*d3as)/phi^7 +
+    ##         0.5*sum(m^2*d4as)/phi^8
+
+    ##       d2info_phi <- cbind(rbind(d2info_phi11, rep(0, p_all)), c(rep(0, p_all),
+    ##                                                                 d2info_phi22))
+    ##       dinfo <- function(u) {
+    ##         if(is.element(u, 1:p_all)) dinfo <- dinfo_beta(u)
+    ##         if(u == p_all + 1) dinfo <- dinfo_phi
+    ##         return(dinfo)
+    ##       }
+
+    ##       d2info <- function(u, v) {
+    ##         if((is.element(u, 1:p_all)) & (is.element(v, 1:p_all))) {
+    ##           d2info <- d2info_beta(u, v)
+    ##         }
+    ##         if((is.element(u, 1:p_all)) & (v == p_all + 1)) {
+    ##           d2info <- d2info_betaphi(u)
+    ##         }
+    ##         if((is.element(v, 1:p_all)) & (u == p_all + 1)) {
+    ##           d2info <- d2info_betaphi(v)
+    ##         }
+    ##         if((u == p_all + 1) & (v == p_all + 1)) {
+    ##           d2info <- d2info_phi
+    ##         }
+    ##         return(d2info)
+    ##       }
+
+    ##       der2 <- function(u, v) {
+    ##         - 0.25*diag(F%*%dinfo(u)%*%F)[j] * diag(F%*%dinfo(v)%*%F)[j]/ses[j]^3 +
+    ##           0.5*diag(F%*%dinfo(u)%*%F%*%dinfo(v)%*%F)[j]/ses[j] +
+    ##           0.5*diag(F%*%dinfo(v)%*%F%*%dinfo(u)%*%F)[j]/ses[j] -
+    ##           0.5*diag(F%*%d2info(u, v)%*%F)[j]/ses[j]
+    ##       }
+    ##       d2se <- outer(seq.int(p_all + 1), seq.int(p_all + 1), Vectorize(der2))
+    ##     }
+    ##     d2se
+    ##   }
+    ##   a <- -t[j] * u_analytical(j)
+    ##   a[j] <- 1 + a[j]
+    ##   t[j] - sum(a * b, na.rm = TRUE)/ses[j] +
+    ##     (sum(F * (tcrossprod(a, u_analytical(j))), na.rm = TRUE)/ses[j] +
+    ##        0.5 * t[j] * sum(F * V_analytical(j), na.rm = TRUE))/ses[j]
+    ## }
