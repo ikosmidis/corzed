@@ -29,10 +29,10 @@ corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel =
     info <- object$auxiliary_functions$information
     no_dispersion <- object$family$family %in% c("poisson", "binomial")
     ## Robustify against aliasing
-    aliased <- which(is.na(beta))
+    aliased <- is.na(beta)
     p_all <- length(beta)
 
-    beta_ind <- seq.int(p_all)[-aliased]
+    beta_ind <- seq.int(p_all)[!aliased]
 
     ## Compute inverse Fisher information, standard errors and t values
     if (no_dispersion) {
@@ -52,10 +52,6 @@ corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel =
     if (!adjust) {
         return(t)
     }
-
-##:ess-bp-start::browser@nil:##
-browser(expr=is.null(.ESSBP.[["@7@"]]));##:ess-bp-end:##
-
 
     ## Otherwise continue to the computation of the adjustment (need
     ## bias at the mle and information function)
@@ -89,32 +85,33 @@ browser(expr=is.null(.ESSBP.[["@7@"]]));##:ess-bp-end:##
              0.5 * t[j] * sum(F * V, na.rm = TRUE))/ses[j]
     }
 
+    beta_names <- names(beta)
+
     if (is.null(which)) {
-        which <- seq.int(p_all)
+        which <- beta_ind
+        if (any(aliased)) {
+            warning(paste(beta_names[aliased], "are NA and will be dropped"))
+        }
     }
 
     if (is.character(which)) {
-        beta_names <- names(beta)
+        if (all(!(which %in% beta_names)))
+            stop("invalid variables selected")
+        is_aliased <- which %in% beta_names[aliased]
+        if (any(is_aliased)) {
+            warning(paste(which[is_aliased], "is NA"))
+            which <- which[!is_aliased]
+        }
         which <- match(which, beta_names)
     }
 
-    beta_ind <- beta_ind[which]
-
-    if (any(is.na(beta_ind))) {
-        stop("variable name mismatch")
-    }
-
-
-    beta_ind <- beta_ind[!is.na(t[beta_ind])]
-
-
-    foreach_object <- eval(as.call(c(list(quote(foreach::foreach), i = beta_ind, .combine = "c"))))
+    foreach_object <- eval(as.call(c(list(quote(foreach::foreach), i = which, .combine = "c"))))
     if (parallel) {
         setup_parallel()
-        t[beta_ind] <- foreach::`%dopar%`(foreach_object, adj_t(i))
+        t[which] <- foreach::`%dopar%`(foreach_object, adj_t(i))
     }
     else {
-        t[beta_ind] <- foreach::`%do%`(foreach_object, adj_t(i))
+        t[which] <- foreach::`%do%`(foreach_object, adj_t(i))
     }
 
     t[which]
