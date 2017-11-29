@@ -29,8 +29,10 @@ corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel =
     info <- object$auxiliary_functions$information
     no_dispersion <- object$family$family %in% c("poisson", "binomial")
     ## Robustify against aliasing
+    aliased <- which(is.na(beta))
     p_all <- length(beta)
-    beta_ind <- seq.int(p_all)
+
+    beta_ind <- seq.int(p_all)[-aliased]
 
     ## Compute inverse Fisher information, standard errors and t values
     if (no_dispersion) {
@@ -41,13 +43,19 @@ corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel =
         F_inds <- c(beta_ind, p_all + 1)
         F <- matrix(NA, p_all + 1, p_all + 1)
     }
+
     F[F_inds, F_inds] <- solve(info(beta, phi, type = "expected")[F_inds, F_inds])
     ses <- sqrt(diag(F))[1L:p_all]
+
     t <- (beta - null)/ses
     ## If no correction return t
     if (!adjust) {
         return(t)
     }
+
+##:ess-bp-start::browser@nil:##
+browser(expr=is.null(.ESSBP.[["@7@"]]));##:ess-bp-end:##
+
 
     ## Otherwise continue to the computation of the adjustment (need
     ## bias at the mle and information function)
@@ -98,6 +106,7 @@ corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel =
 
 
     beta_ind <- beta_ind[!is.na(t[beta_ind])]
+
 
     foreach_object <- eval(as.call(c(list(quote(foreach::foreach), i = beta_ind, .combine = "c"))))
     if (parallel) {
