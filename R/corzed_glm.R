@@ -25,7 +25,7 @@
 #'
 #' @export
 corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE,
-                       numeric = FALSE, ...) {
+                       numeric = TRUE, ...) {
 
     adj_t_numeric <- function(j) {
         u <- numDeriv::grad(kappa, theta, j = j)
