@@ -2,6 +2,9 @@
 #'
 #' @inheritParams corzed
 #'
+#' @param numeric shall numerical derivatives be used for the
+#'     computation of the location-adjusted statistics? Default is \code{TRUE}
+#'
 #' @author Ioannis Kosmidis \email{i.kosmidis@ucl.ac.uk},
 #'         Claudia Di Caterina \email{dicaterina@stat.unipd.it}
 #'
@@ -22,7 +25,7 @@
 #'
 #' @export
 corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE,
-                       analytic = FALSE, ...) {
+                       numeric = FALSE, ...) {
 
     adj_t_numeric <- function(j) {
         u <- numDeriv::grad(kappa, theta, j = j)
@@ -188,9 +191,20 @@ corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel =
     F[F_inds, F_inds] <- solve(info(beta, phi, type = "expected")[F_inds, F_inds])
     ses <- sqrt(diag(F))[1L:p_all]
     t <- (beta - null)/ses
+        beta_names <- names(beta)
+
+    if (is.null(which)) {
+        which <- beta_ind
+    }
+    if (is.character(which)) {
+        if (all(!(which %in% beta_names)))
+            stop("invalid variables selected")
+        which <- match(which, beta_names)
+    }
+
     ## if no correction return t
     if (!adjust) {
-        return(t)
+        return(t[which])
     }
     ## otherwise continue to the computation of the adjustment (need
     ## bias at the mle and information function)
@@ -215,7 +229,10 @@ corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel =
         }
     }
 
-    if (analytic) {
+    if (numeric) {
+        adj_t <- adj_t_numeric
+    }
+    else {
         X <- model.matrix(object)
         family <- enrich(object$family)
         link <- enrich(make.link(object$family$link))
@@ -225,19 +242,8 @@ corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel =
         m <- weights(object, type = "prior")
         adj_t <- adj_t_analytic
     }
-    else {
-        adj_t <- adj_t_numeric
-    }
 
-    beta_names <- names(beta)
-    if (is.null(which)) {
-        which <- beta_ind
-    }
-    if (is.character(which)) {
-        if (all(!(which %in% beta_names)))
-            stop("invalid variables selected")
-        which <- match(which, beta_names)
-    }
+
     foreach_object <- eval(as.call(c(list(quote(foreach::foreach), i = which, .combine = "c"))))
     if (parallel) {
         setup_parallel()
