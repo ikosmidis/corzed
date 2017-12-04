@@ -44,7 +44,7 @@ NULL
 #' @author Ioannis Kosmidis \email{i.kosmidis@ucl.ac.uk},
 #'         Claudia Di Caterina \email{dicaterina@stat.unipd.it}
 #'
-#' @seealso \code{\link{corzed}}
+#' @seealso \code{\link{corzed.glm}}
 #'
 #' @references
 #'
