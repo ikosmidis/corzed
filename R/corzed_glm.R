@@ -16,7 +16,7 @@
 #' modML <- glm(conc ~ log(u)*lot, data = clotting, family = Gamma(link="log"))
 #' corzed(modML, parallel = FALSE)
 #'
-#' ## Aliasing
+#' ## Unidentifiability
 #' modMLo <- glm(conc ~ log(u)*lot + I(2*log(u)), data = clotting, family = Gamma(link="log"))
 #' corzed(modMLo)
 #'
@@ -35,6 +35,8 @@ corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel =
     }
 
     ## Can be optimised further to save on some matrix multiplications
+    ## by vectorising some of the operations.
+    ## Needs work to work with aliased parameters (see test_analytic.R)
     adj_t_analytic <- function(j) {
         d1mus <- link$mu.eta(etas)
         d2mus <- link$d2mu.deta(etas)
