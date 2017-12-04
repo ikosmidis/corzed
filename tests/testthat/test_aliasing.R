@@ -1,3 +1,5 @@
+library("plyr")
+
 data("babies", package = "cond")
 
 ## clogit understands only 0-1 so expand
