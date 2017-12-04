@@ -15,8 +15,7 @@ Suggests: foreach,
 	  testthat,
 	  knitr,
           rmarkdown,
-	  covr,
-	  foreach
+	  covr
 Imports: enrichwith
 VignetteBuilder: knitr
 URL: https://github.com/ikosmidis/corzed
