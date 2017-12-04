@@ -5,7 +5,7 @@
 \title{Location-adjusted Wald statistics for \code{\link{glm}} objects}
 \usage{
 \method{corzed}{glm}(object, null = 0, adjust = TRUE, which = NULL,
-  parallel = FALSE, analytical = FALSE, ...)
+  parallel = FALSE, analytic = FALSE, ...)
 }
 \arguments{
 \item{object}{a fitted model object (e.g. the result of a
@@ -39,9 +39,9 @@ clotting <- data.frame(
    lot = factor(c(rep(1, 9), rep(2, 9))))
 
 modML <- glm(conc ~ log(u)*lot, data = clotting, family = Gamma(link="log"))
-corzed(modML)
+corzed(modML, parallel = FALSE)
 
-## Aliasing
+## Unidentifiability
 modMLo <- glm(conc ~ log(u)*lot + I(2*log(u)), data = clotting, family = Gamma(link="log"))
 corzed(modMLo)
 
