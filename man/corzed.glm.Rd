@@ -5,7 +5,7 @@
 \title{Location-adjusted Wald statistics for \code{\link{glm}} objects}
 \usage{
 \method{corzed}{glm}(object, null = 0, adjust = TRUE, which = NULL,
-  parallel = FALSE, analytic = FALSE, ...)
+  parallel = FALSE, numeric = TRUE, ...)
 }
 \arguments{
 \item{object}{a fitted model object (e.g. the result of a
@@ -26,6 +26,9 @@ parameters}
 
 \item{parallel}{if \code{TRUE}, the statistics are computed in
 parallel using the backend provided to \code{\link{foreach}}}
+
+\item{numeric}{shall numerical derivatives be used for the
+computation of the location-adjusted statistics? Default is \code{TRUE}}
 
 \item{...}{further arguments to be passed to or from other methods}
 }

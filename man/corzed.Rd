@@ -42,7 +42,7 @@ Di Caterina C, Kosmidis I (2017). Location-adjusted Wald statistic
 for scalar parameters *arXiv*, **arXiv:1710.11217**
 }
 \seealso{
-\code{\link{corzed}}
+\code{\link{corzed.glm}}
 }
 \author{
 Ioannis Kosmidis \email{i.kosmidis@ucl.ac.uk},
