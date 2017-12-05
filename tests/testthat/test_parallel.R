@@ -1,6 +1,6 @@
 library("foreach")
 library("doMC")
-registerDoMC(3)
+registerDoMC(4)
 
 data("babies", package = "corzed")
 
@@ -16,8 +16,8 @@ test_that("use of parallel returns the same statistics as serial evaluation", {
 })
 
 
-ci0 <- corzed_confint(babies_ml0, parallel = FALSE, which = c(1, 3, 5, 12, 19))
-ci1 <- corzed_confint(babies_ml0, parallel = TRUE, which = c(1, 3, 5, 12, 19))
+ci0 <- corzed_confint(babies_ml0, parallel = FALSE, which = c(2, 5, 12, 19))
+ci1 <- corzed_confint(babies_ml0, parallel = TRUE, which = c(2, 5, 12, 19))
 
 test_that("use of parallel returns the same confidence intervals as serial evaluation", {
     expect_equal(ci1, ci0, tolerance = tolerance)
