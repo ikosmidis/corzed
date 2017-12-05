@@ -39,7 +39,7 @@ corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel =
 
     ## Can be optimised further to save on some matrix multiplications
     ## by vectorising some of the operations.
-    ## Needs work to work with aliased parameters (see test_analytic.R)
+    ## Needs work to avoid errors when there are unidentified parameters (see test_analytic.R)
     adj_t_analytic <- function(j) {
         d1mus <- link$mu.eta(etas)
         d2mus <- link$d2mu.deta(etas)

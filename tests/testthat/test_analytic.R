@@ -5,8 +5,8 @@ clotting <- data.frame(
 
 modML <- glm(conc ~ log(u)*lot, data = clotting, family = Gamma(link="log"))
 
-c_num <- corzed(modML, analytic = FALSE)
-c_ana <- corzed(modML, analytic = TRUE)
+c_num <- corzed(modML, numeric = FALSE)
+c_ana <- corzed(modML, numeric = TRUE)
 
 tolerance <- 1e-06
 test_that("analytic implementation gives the same result as numerical one", {
@@ -14,8 +14,8 @@ test_that("analytic implementation gives the same result as numerical one", {
 })
 
 modML1 <- glm(conc ~ log(u)*lot + I(2 * log(u)), data = clotting, family = Gamma(link="log"))
-c1_num <- corzed(modML1, analytic = FALSE)
-c1_ana <- corzed(modML1, analytic = TRUE)
+c1_num <- corzed(modML1, numeric = FALSE)
+c1_ana <- corzed(modML1, numeric = TRUE)
 
 test_that("analytic implementation gives the same result as numerical one with aliasing", {
     expect_equal(c1_num, c1_ana, tolerance = tolerance)
