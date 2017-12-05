@@ -1,5 +1,35 @@
 #' Confidence intervals by inversion of the location-adjusted Wald statistic
-
+#'
+#' @inheritParams corzed
+#'
+#' @param level the confidence level required. Default is 0.95
+#'
+#' @param length The length of the grid on which the location-adjusted
+#'     statistic is evaluated. Default is 20. See details.
+#'
+#' @param return_values Return the values of the statistic on the grid
+#'     instead of confidence intervals? Default is \code{FALSE}.
+#'
+#' @seealso \code{\link{summary.glm}}
+#'
+#' @examples
+#' clotting <- data.frame(
+#'    conc = c(118,58,42,35,27,25,21,19,18,69,35,26,21,18,16,13,12,12),
+#'    u = c(5,10,15,20,30,40,60,80,100, 5,10,15,20,30,40,60,80,100),
+#'    lot = factor(c(rep(1, 9), rep(2, 9))))
+#'
+#' modML <- glm(conc ~ log(u)*lot, data = clotting, family = Gamma(link="log"))
+#' corzed_confint(modML, parallel = FALSE)
+#'
+#' \dontrun{
+#' ## Now do the same in parallel
+#' library("foreach")
+#' library("doMC")
+#' registerDoMC(2)
+#' corzed_confint(modML, parallel = TRUE)
+#' }
+#'
+#' @export
 corzed_confint <- function(object, level = 0.95, adjust = TRUE, which,
                            parallel = TRUE, numeric = TRUE,
                            length = 20, return_values = FALSE) {

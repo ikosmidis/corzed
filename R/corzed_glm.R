@@ -5,9 +5,6 @@
 #' @param numeric shall numerical derivatives be used for the
 #'     computation of the location-adjusted statistics? Default is \code{TRUE}
 #'
-#' @author Ioannis Kosmidis \email{i.kosmidis@ucl.ac.uk},
-#'         Claudia Di Caterina \email{dicaterina@stat.unipd.it}
-#'
 #' @seealso \code{\link{summary.glm}}
 #'
 #' @examples
