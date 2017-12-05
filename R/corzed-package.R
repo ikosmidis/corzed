@@ -26,9 +26,9 @@ NULL
 #' @param null a scalar or a vector of the same length as
 #'     \code{coef(object)} defining the parameter values for the null
 #'     hypotheses. \code{0} by default
-#' @param adjust if \code{TRUE} (default) compute the
-#'     location-adjusted Wald statistic is returned, if \code{FALSE}
-#'     return the standard Wald statistic
+#' @param adjust if \code{TRUE} (default) return the location-adjusted
+#'     Wald statistic, if \code{FALSE} return the standard Wald
+#'     statistic
 #' @param which for which parameters should the statistics be
 #'     computed? This can be a numeric or character vector.  The
 #'     default (\code{NULL}) is to compute statistics for all
