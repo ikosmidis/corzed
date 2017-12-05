@@ -4,11 +4,15 @@
 #'
 #' @param level the confidence level required. Default is 0.95
 #'
+#' @param adjust if \code{TRUE} (default) use the location-adjusted
+#'     Wald statistic, if \code{FALSE} use the standard Wald
+#'     statistic
+#'
 #' @param length The length of the grid on which the location-adjusted
 #'     statistic is evaluated. Default is 20. See details.
 #'
 #' @param return_values Return the values of the statistic on the grid
-#'     instead of confidence intervals? Default is \code{FALSE}.
+#'     instead of confidence intervals? Default is \code{FALSE}
 #'
 #' @seealso \code{\link{summary.glm}}
 #'
@@ -18,15 +22,30 @@
 #'    u = c(5,10,15,20,30,40,60,80,100, 5,10,15,20,30,40,60,80,100),
 #'    lot = factor(c(rep(1, 9), rep(2, 9))))
 #'
-#' modML <- glm(conc ~ log(u)*lot, data = clotting, family = Gamma(link="log"))
+#' modML <- glm(conc ~ log(u)*lot, data = clotting,
+#'              family = Gamma(link="log"))
 #' corzed_confint(modML, parallel = FALSE)
 #'
 #' \dontrun{
-#' ## Now do the same in parallel
+#' ## Now do the same in parallel using 4 cores
 #' library("foreach")
 #' library("doMC")
-#' registerDoMC(2)
+#' registerDoMC(4)
 #' corzed_confint(modML, parallel = TRUE)
+#'
+#' ## Differences between the Wald and location-adjusted Wald statistic
+#' data("babies", package = "corzed")
+#' babies_ml0 <- glm(formula = y ~ day + lull - 1, family = binomial,
+#'                   data = babies)
+#' out_corzed <- corzed_confint(babies_ml0, adjust = TRUE, which = "lullyes",
+#'                              parallel = TRUE, return_values = TRUE)
+#' out_wald <- corzed_confint(babies_ml0, adjust = FALSE, which = "lullyes",
+#'                            parallel = TRUE, return_values = TRUE)
+#' ## Statistics and critical values for 95\% 2-sided intervals
+#' with(out_corzed, plot(grid, value, type = "l", col = "red"))
+#' with(out_wald, points(grid, value, type = "l", col = "blue"))
+#' abline(a = qnorm(0.975), b = 0, lty = 2)
+#' abline(a = qnorm(0.025), b = 0, lty = 2)
 #' }
 #'
 #' @export
@@ -36,7 +55,7 @@ corzed_confint <- function(object, level = 0.95, adjust = TRUE, which,
 
     ci <- function(j) {
         stat <- function(b) {
-            corzed(object, null = b, adjust = TRUE, which = j)
+            corzed(object, null = b, adjust = adjust, which = j)
         }
         bs <- seq(low[j], upp[j], length = length)
         if (aliased[j]) {
@@ -44,7 +63,7 @@ corzed_confint <- function(object, level = 0.95, adjust = TRUE, which,
         }
         vals <- sapply(bs, stat)
         if (return_values) {
-            vals
+            data.frame(grid = bs, value = vals, parameter = j)
         }
         else {
             sp <- spline(x = bs, y = vals)
@@ -55,7 +74,7 @@ corzed_confint <- function(object, level = 0.95, adjust = TRUE, which,
     cis <- confint.default(object, level = level)
     len <- apply(cis, 1, diff)
     par_names <- rownames(cis)
-    if (!adjust) {
+    if (!adjust & !return_values) {
         return(cis[which,])
     }
     low <- cis[, 1] - len/3
@@ -79,7 +98,11 @@ corzed_confint <- function(object, level = 0.95, adjust = TRUE, which,
     else {
         out <- foreach::`%do%`(foreach_object, if (aliased[i]) NAout else ci(i))
     }
-    rownames(out) <- par_names[which]
-    colnames(out) <- pct
+
+    if (!return_values) {
+        rownames(out) <- par_names[which]
+        colnames(out) <- pct
+    }
     out
 }
+
