@@ -16,9 +16,9 @@ corzed(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE,
 \code{coef(object)} defining the parameter values for the null
 hypotheses. \code{0} by default}
 
-\item{adjust}{if \code{TRUE} (default) compute the
-location-adjusted Wald statistic is returned, if \code{FALSE}
-return the standard Wald statistic}
+\item{adjust}{if \code{TRUE} (default) return the location-adjusted
+Wald statistic, if \code{FALSE} return the standard Wald
+statistic}
 
 \item{which}{for which parameters should the statistics be
 computed? This can be a numeric or character vector.  The

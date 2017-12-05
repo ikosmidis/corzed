@@ -15,9 +15,9 @@
 \code{coef(object)} defining the parameter values for the null
 hypotheses. \code{0} by default}
 
-\item{adjust}{if \code{TRUE} (default) compute the
-location-adjusted Wald statistic is returned, if \code{FALSE}
-return the standard Wald statistic}
+\item{adjust}{if \code{TRUE} (default) return the location-adjusted
+Wald statistic, if \code{FALSE} return the standard Wald
+statistic}
 
 \item{which}{for which parameters should the statistics be
 computed? This can be a numeric or character vector.  The
@@ -51,8 +51,4 @@ corzed(modMLo)
 }
 \seealso{
 \code{\link{summary.glm}}
-}
-\author{
-Ioannis Kosmidis \email{i.kosmidis@ucl.ac.uk},
-        Claudia Di Caterina \email{dicaterina@stat.unipd.it}
 }

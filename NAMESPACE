@@ -2,4 +2,5 @@
 
 S3method(corzed,glm)
 export(corzed)
+export(corzed_confint)
 import(enrichwith)
