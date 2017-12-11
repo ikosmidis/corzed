@@ -1,7 +1,0 @@
-load("/Users/claudia/local corzed/paper/supplementary/results/clotting_simulation.rda")
-ls()
-nsimu
-n_obs
-n_par
-str(res)
-load("/Users/claudia/local corzed/paper/supplementary/results/brockwell_gordon_simulation.rda")
