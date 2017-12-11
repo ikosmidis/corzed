@@ -11,4 +11,4 @@ The methodology comes from the paper
 
 Di Caterina, Claudia and Kosmidis, Ioannis (2017). [Location-Adjusted Wald Statistic for Scalar Parameters](https://arxiv.org/abs/1710.11217). ArXiv E-Prints
 
-whose supplementary material is in [`inst/supplementary_1710-11217`](https://github.com/ikosmidis/corzed/tree/master/supplementary_1710-11217).
+whose supplementary material is in [`inst/supplementary_1710-11217`](https://github.com/ikosmidis/corzed/tree/master/inst/supplementary_1710-11217).
