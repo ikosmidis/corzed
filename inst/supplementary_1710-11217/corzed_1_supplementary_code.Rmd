@@ -8,7 +8,7 @@ bibliography: corzed_supplementary_code.bib
 
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(collapse = T, comment = "#", fig.width=6, fig.height=4, out.width="75%", dpi = 200)
+knitr::opts_chunk$set(collapse = T, comment = "#", fig.width=7, fig.height=4, out.width="75%", dpi = 200)
 options(width = 80)
 ```
 
@@ -56,13 +56,15 @@ data("ReadingSkills", package = "betareg")
 rs_beta_ml <- betareg(accuracy ~ dyslexia * iq | dyslexia + iq,
                       data = ReadingSkills, type = "ML")
 rs_summary_ml <- coef(summary(rs_beta_ml))
-rs_ml_estimates <- do.call("rbind", lapply(rs_summary_ml, function(z) z[, c("Estimate", "Std. Error")]))
+rs_ml_estimates <- do.call("rbind", lapply(rs_summary_ml,
+                                           function(z) z[, c("Estimate", "Std. Error")]))
 rs_ml_cis <- confint(rs_beta_ml)
 
 ## bias corrected fit and corresponding 95\% Wald confidence intervals
 rs_beta_bc <- update(rs_beta_ml, type = "BC")
 rs_summary_bc <- coef(summary(rs_beta_bc))
-rs_bc_estimates <- do.call("rbind", lapply(rs_summary_bc, function(z) z[, c("Estimate", "Std. Error")]))
+rs_bc_estimates <- do.call("rbind", lapply(rs_summary_bc,
+                                           function(z) z[, c("Estimate", "Std. Error")]))
 rs_bc_cis <- confint(rs_beta_bc)
 
 ## Table 1 in manuscript
@@ -122,12 +124,14 @@ clotting <- data.frame(
 ## The maximum likelihood fit of the gamma regression model
 clotting_ml <- glm(conc ~ log(u)*lot, data = clotting, family = Gamma(link = "log"))
 
-## Maximum likelihood estimates and Wald statistics using maximum likelihood estimator of the dispersion parameter
+## Maximum likelihood estimates and Wald statistics using maximum likelihood estimator
+## of the dispersion parameter
 dispersion_ml <- MASS::gamma.dispersion(clotting_ml)
 clotting_summary_ml <- summary(clotting_ml, dispersion = dispersion_ml)
 clotting_ml_estimates <- coef(clotting_summary_ml)[, c("Estimate", "z value")]
 
-## Maximum likelihood estimates and Wald statistics using the moment-based estimator of the dispersion parameter
+## Maximum likelihood estimates and Wald statistics using the moment-based estimator
+## of the dispersion parameter
 clotting_summary_mom <-  summary(clotting_ml)
 dispersion_mom <- clotting_summary_mom$dispersion
 clotting_mom_estimates <- coef(clotting_summary_mom)[, c("Estimate", "t value")]
@@ -186,7 +190,8 @@ ggplot(typeI %>% filter(parameter != 1)) +
                            expression(beta[2]),
                            expression(beta[3]),
                            expression(beta[4]))) +
-    scale_y_continuous(name = expression(paste("Empirical rejection probability (", symbol('\045'), ")")),
+    scale_y_continuous(name = expression(paste("Empirical rejection probability (",
+                                               symbol('\045'), ")")),
                        labels = function (x) {
                            if (length(x) == 0)
                                return(character())
@@ -242,7 +247,8 @@ out2 <- c(
 
 ## Table 4 in the manuscript
 table4 <- matrix(c(out1, out2), ncol = 7, byrow = TRUE,
-                 dimnames = list(NULL, c("mle", "mcle", "wald_ml", "wald_mlc", "r", "rc", "wald_adjusted")))
+                 dimnames = list(NULL, c("mle", "mcle", "wald_ml", "wald_mlc",
+                                         "r", "rc", "wald_adjusted")))
 round(table4, 4)
 ```
 
@@ -267,7 +273,8 @@ pval <- pval %>%
                                 "left" = "gamma < 0",
                                 "right" = "gamma > 0"),
            statistic = factor(statistic,
-                              levels = c("mle", "r", "cond", "scorec", "rc", "cor"), ordered = TRUE)) %>%
+                              levels = c("mle", "r", "cond", "scorec", "rc", "cor"),
+                              ordered = TRUE)) %>%
     mutate(statistic = dplyr::recode(statistic,
                                      "mle" = "italic(t)",
                                      "r" = "italic(r)",
@@ -296,7 +303,7 @@ ggplot(pval) +
           panel.grid.minor.x = element_blank(),
           panel.grid.major.x = element_blank(),
           strip.background = element_blank(),
-          axis.text.x = element_text(angle = 45, hjust = 1, size = 5)) +
+          axis.text.x = element_text(angle = 45, hjust = 1, size = 4)) +
     labs(x = expression(paste("Empirical ", italic(p), "-value ")), y = "Density")
 ```
 
@@ -338,12 +345,14 @@ plot_meta_lines1 <- ggplot(df) +
     scale_x_continuous(name = expression(psi), breaks = seq(0, 0.1, length = 6),
                        labels = c("0.00", "0.02", "0.04", "0.06", "0.08", "0.10")) +
     scale_linetype_manual(name = "", values = c(2, 1, 3, 4, 5),
-                          labels = c(expression(italic(t)), expression(italic(t)^list("*")), "DL",
+                          labels = c(expression(italic(t)), expression(italic(t)^list("*")),
+                                     "DL",
                                      expression(italic(r)[p]), expression(italic(r)))) +
     theme_bw() +
     theme(text=element_text(size = 11)) +
-    theme(legend.position = "none", panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank(),
-        panel.grid.minor.x = element_blank(), strip.background = element_blank())
+    theme(legend.position = "none", panel.grid.major.y = element_blank(),
+          panel.grid.minor.y = element_blank(),
+          panel.grid.minor.x = element_blank(), strip.background = element_blank())
 
 ## Coverage plots: Coverage versus K
 n.val <- unname(Ks)
@@ -379,11 +388,15 @@ plot_meta_lines2 <- ggplot(df) +
                        breaks = c(log(5), log(10), log(25), log(50), log(100), log(200)),
                        labels = c("5", "10", "25", "50", "100", "200")) +
     scale_linetype_manual(name = "", values = c(2, 1, 3, 4, 5),
-                          labels = c(expression(italic(t)), expression(italic(t)^list("*")), "DL",
-                                     expression(italic(r)[p]), expression(italic(r)^list("*")))) +
+                          labels = c(expression(italic(t)),
+                                     expression(italic(t)^list("*")),
+                                     "DL",
+                                     expression(italic(r)[p]),
+                                     expression(italic(r)^list("*")))) +
     theme_bw() +
     theme(text=element_text(size = 11)) +
-    theme(legend.position = "none", panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank(),
+    theme(legend.position = "none", panel.grid.major.y = element_blank(),
+          panel.grid.minor.y = element_blank(),
           panel.grid.minor.x = element_blank(), strip.background = element_blank())
 
 ## Figure 4 in manuscript
@@ -398,7 +411,8 @@ corzed_cis <- corzed_ci(rs_beta_ml, level = 0.95, correction = TRUE)
 ## Table 5 in the manuscript
 table5 <- cbind(corzed_cis[-c(1, 5),],
                 rs_coverage %>% select(parameter, level, coverage.cor) %>%
-                reshape(idvar = c("parameter"), v.names = "coverage.cor", timevar = "level", direction = "wide") %>%
+                reshape(idvar = c("parameter"), v.names = "coverage.cor",
+                        timevar = "level", direction = "wide") %>%
                 select(-parameter))
 round(table5, 3)
 ```
