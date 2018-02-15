@@ -8,7 +8,7 @@ bibliography: corzed_supplementary_code.bib
 
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(collapse = T, comment = "#")
+knitr::opts_chunk$set(collapse = T, comment = "#", fig.width=6, fig.height=4, out.width="75%", dpi = 200)
 options(width = 80)
 ```
 
@@ -276,10 +276,18 @@ pval <- pval %>%
                                      "rc" = "italic(r)[c]",
                                      "cor" = "italic(t)^'*'"))
 
+### NEW CODE
+## Bin sample
+breaks <- (0:20)/20
+pval <- pval %>%
+    group_by(statistic, test) %>%
+    mutate(sample = cut(sample, breaks = breaks, include.lowest = TRUE)) %>%
+    group_by(statistic, test, sample)
+
 ## Figure 3 in the manuscript
 ggplot(pval) +
-    geom_segment(aes(x = 0, xend = 1, y = 1, yend = 1)) +
-    geom_histogram(aes(x = sample, y = ..density..), bins = 20, fill = "darkgray", col = "white", alpha = 0.5) +
+    geom_hline(aes(yintercept = 1)) +
+    geom_bar(aes(x = sample, y = ..count../2500), fill = "darkgray", alpha = 0.5) +
     facet_grid(test ~ statistic, labeller = label_parsed) +
     theme_bw() +
     theme(legend.position = "top",
@@ -288,8 +296,7 @@ ggplot(pval) +
           panel.grid.minor.x = element_blank(),
           panel.grid.major.x = element_blank(),
           strip.background = element_blank(),
-          axis.text.x = element_text(angle = 45, hjust = 1)) +
-    coord_cartesian(ylim = c(0.4 , 1.25)) +
+          axis.text.x = element_text(angle = 45, hjust = 1, size = 5)) +
     labs(x = expression(paste("Empirical ", italic(p), "-value ")), y = "Density")
 ```
 
