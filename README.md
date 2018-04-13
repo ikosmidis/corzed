@@ -1,7 +1,3 @@
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/waldi)](https://cran.r-project.org/package=waldi)
-[![Travis-CI Build Status](https://travis-ci.org/ikosmidis/waldi.svg?branch=master)](https://travis-ci.org/ikosmidis/waldi)
-[![Coverage Status](https://img.shields.io/codecov/c/github/ikosmidis/waldi/master.svg)](https://codecov.io/github/ikosmidis/waldi?branch=master)
-to:
 waldi
 ======
 
