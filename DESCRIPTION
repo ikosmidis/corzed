@@ -1,4 +1,4 @@
-Package: corzed
+Package: waldi
 Title: What the Package Does (one line, title case)
 Version: 0.0.0.9000
 Authors@R: c(person("Ioannis", "Kosmidis", email = "i.kosmidis@ucl.ac.uk", role = c("aut", "cre")),
@@ -18,5 +18,5 @@ Suggests: foreach,
 	  covr
 Imports: enrichwith
 VignetteBuilder: knitr
-URL: https://github.com/ikosmidis/corzed
-BugReports: https://github.com/ikosmidis/corzed/issues
+URL: https://github.com/ikosmidis/waldi
+BugReports: https://github.com/ikosmidis/waldi/issues

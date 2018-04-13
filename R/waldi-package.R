@@ -1,4 +1,4 @@
-#' corzed: Location-adjusted Wald statistic for general model classes
+#' waldi: Location-adjusted Wald statistic for general model classes
 #'
 #' ADD PACKAGE DESCRIPTION HERE
 #'
@@ -15,7 +15,7 @@
 #' for scalar parameters *arXiv*, **arXiv:1710.11217**
 #'
 #' @docType package
-#' @name corzed-package
+#' @name waldi-package
 #' @import enrichwith
 NULL
 
@@ -39,12 +39,12 @@ NULL
 #'
 #' @details
 #'
-#' \code{corzed} stands for "cor"rected "zed"-statistic.
+#' \code{waldi} stands for "cor"rected "zed"-statistic.
 #'
 #' @author Ioannis Kosmidis \email{i.kosmidis@ucl.ac.uk},
 #'         Claudia Di Caterina \email{dicaterina@stat.unipd.it}
 #'
-#' @seealso \code{\link{corzed.glm}}
+#' @seealso \code{\link{waldi.glm}}
 #'
 #' @references
 #'
@@ -52,6 +52,6 @@ NULL
 #' for scalar parameters *arXiv*, **arXiv:1710.11217**
 #'
 #' @export
-corzed <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE, ...) {
-    UseMethod("corzed")
+waldi <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE, ...) {
+    UseMethod("waldi")
 }

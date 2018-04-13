@@ -1,6 +1,6 @@
 #' Confidence intervals by inversion of the location-adjusted Wald statistic
 #'
-#' @inheritParams corzed
+#' @inheritParams waldi
 #'
 #' @param level the confidence level required. Default is 0.95
 #'
@@ -24,38 +24,38 @@
 #'
 #' modML <- glm(conc ~ log(u)*lot, data = clotting,
 #'              family = Gamma(link="log"))
-#' corzed_confint(modML, parallel = FALSE)
+#' waldi_confint(modML, parallel = FALSE)
 #'
 #' \dontrun{
 #' ## Now do the same in parallel using 4 cores
 #' library("foreach")
 #' library("doMC")
 #' registerDoMC(4)
-#' corzed_confint(modML, parallel = TRUE)
+#' waldi_confint(modML, parallel = TRUE)
 #'
 #' ## Differences between the Wald and location-adjusted Wald statistic
-#' data("babies", package = "corzed")
+#' data("babies", package = "waldi")
 #' babies_ml0 <- glm(formula = y ~ day + lull - 1, family = binomial,
 #'                   data = babies)
-#' out_corzed <- corzed_confint(babies_ml0, adjust = TRUE, which = "lullyes",
+#' out_waldi <- waldi_confint(babies_ml0, adjust = TRUE, which = "lullyes",
 #'                              parallel = TRUE, return_values = TRUE)
-#' out_wald <- corzed_confint(babies_ml0, adjust = FALSE, which = "lullyes",
+#' out_wald <- waldi_confint(babies_ml0, adjust = FALSE, which = "lullyes",
 #'                            parallel = TRUE, return_values = TRUE)
 #' ## Statistics and critical values for 95\% 2-sided intervals
-#' with(out_corzed, plot(grid, value, type = "l", col = "red"))
+#' with(out_waldi, plot(grid, value, type = "l", col = "red"))
 #' with(out_wald, points(grid, value, type = "l", col = "blue"))
 #' abline(a = qnorm(0.975), b = 0, lty = 2)
 #' abline(a = qnorm(0.025), b = 0, lty = 2)
 #' }
 #'
 #' @export
-corzed_confint <- function(object, level = 0.95, adjust = TRUE, which,
+waldi_confint <- function(object, level = 0.95, adjust = TRUE, which,
                            parallel = TRUE, numeric = TRUE,
                            length = 20, return_values = FALSE) {
 
     ci <- function(j) {
         stat <- function(b) {
-            corzed(object, null = b, adjust = adjust, which = j)
+            waldi(object, null = b, adjust = adjust, which = j)
         }
         bs <- seq(low[j], upp[j], length = length)
         if (aliased[j]) {

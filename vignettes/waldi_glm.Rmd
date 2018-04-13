@@ -11,7 +11,7 @@ vignette: >
 
 ## Introduction
 
-## The **corzed** R package
+## The **waldi** R package
 
 ## Location adjusted statistics
 

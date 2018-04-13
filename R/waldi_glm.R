@@ -1,6 +1,6 @@
 #' Location-adjusted Wald statistics for \code{\link{glm}} objects
 #'
-#' @inheritParams corzed
+#' @inheritParams waldi
 #'
 #' @param numeric shall numerical derivatives be used for the
 #'     computation of the location-adjusted statistics? Default is \code{TRUE}
@@ -14,14 +14,14 @@
 #'    lot = factor(c(rep(1, 9), rep(2, 9))))
 #'
 #' modML <- glm(conc ~ log(u)*lot, data = clotting, family = Gamma(link="log"))
-#' corzed(modML, parallel = FALSE)
+#' waldi(modML, parallel = FALSE)
 #'
 #' ## Unidentifiability
 #' modMLo <- glm(conc ~ log(u)*lot + I(2*log(u)), data = clotting, family = Gamma(link="log"))
-#' corzed(modMLo)
+#' waldi(modMLo)
 #'
 #' @export
-corzed.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE,
+waldi.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE,
                        numeric = TRUE, ...) {
 
     adj_t_numeric <- function(j) {

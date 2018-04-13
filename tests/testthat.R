@@ -1,4 +1,4 @@
 library(testthat)
-library(corzed)
+library(waldi)
 
-test_check("corzed")
+test_check("waldi")
