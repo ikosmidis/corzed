@@ -3,7 +3,7 @@
 #'
 #' @inheritParams waldi
 #'
-#' @param numeric shall numerical derivatives be used for the
+#' @param numerical shall numerical derivatives be used for the
 #'     computation of the location-adjusted statistics? Default is \code{TRUE}
 #'
 #' @seealso \code{\link{summary.glm}}
@@ -23,7 +23,7 @@
 #'
 #' @export
 waldi.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE,
-                       numeric = TRUE, ...) {
+                       numerical = TRUE, ...) {
 
     br <- inherits(object, "brglmFit")
 
@@ -230,7 +230,7 @@ waldi.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = 
         }
     }
 
-    if (numeric) {
+    if (numerical) {
         adj_t <- adj_t_numeric
     }
     else {
@@ -243,7 +243,6 @@ waldi.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = 
         m <- weights(object, type = "prior")
         adj_t <- adj_t_analytic
     }
-
 
     foreach_object <- eval(as.call(c(list(quote(foreach::foreach), i = which, .combine = "c"))))
     if (parallel) {
