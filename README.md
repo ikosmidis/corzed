@@ -1,10 +1,18 @@
 waldi
 ======
 
-The current repository hosts the **waldi** R package that provides methods to compute location-adjusted Wald statistics for popular model classes included `glm`.
+**waldi** provides methods to compute location-adjusted Wald statistics and confidence intervals for popular model classes including `glm` and `brglmFit` (see the [**brglm2**](https://cran.r-project.org/package=brglm2) R package).
 
-The methodology comes from the paper
+### Installation
 
-Di Caterina, Claudia and Kosmidis, Ioannis (2017). Location-Adjusted Wald Statistic for Scalar Parameters. ArXiv E-Prints. [arXiv:1710.11217](https://arxiv.org/abs/1710.11217).
+Install the development version from github:
 
-whose supplementary material is in [`inst/supplementary_1710-11217`](https://github.com/ikosmidis/waldi/tree/master/inst/supplementary_1710-11217). The code to reproduce the numerical results is also given in [waldi_1_supplementary_code.pdf](https://github.com/ikosmidis/waldi/blob/master/inst/supplementary_1710-11217/waldi_1_supplementary_code.pdf).
+``` r
+# install.packages("devtools")
+devtools::install_github("ikosmidis/waldi")
+```
+
+### References and resources
+Location-adjusted Wald statistics are defned in
+
+Di Caterina, C and Kosmidis, I (2017). Location-Adjusted Wald Statistic for Scalar Parameters. ArXiv E-Prints. [arXiv:1710.11217](https://arxiv.org/abs/1710.11217).
