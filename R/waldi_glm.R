@@ -24,6 +24,8 @@
 waldi.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE,
                        numeric = TRUE, ...) {
 
+    br <- inherits(object, "brglmFit")
+
     adj_t_numeric <- function(j) {
         u <- numDeriv::grad(kappa, theta, j = j)
         V <- numDeriv::hessian(kappa, theta, j = j)
@@ -185,6 +187,7 @@ waldi.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = 
         F_inds <- c(beta_ind[!aliased], p_all + 1)
         F <- matrix(NA, p_all + 1, p_all + 1)
     }
+
     F[F_inds, F_inds] <- solve(info(beta, phi, type = "expected")[F_inds, F_inds])
     ses <- sqrt(diag(F))[1L:p_all]
     t <- (beta - null)/ses
@@ -205,7 +208,7 @@ waldi.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = 
     }
     ## otherwise continue to the computation of the adjustment (need
     ## bias at the mle and information function)
-    b <- object$auxiliary_functions$bias(beta, phi)
+    b <- if (br) 0 else object$auxiliary_functions$bias(beta, phi)
     if (no_dispersion) {
         theta <- beta
         theta[is.na(theta)] <- 0
@@ -251,5 +254,3 @@ waldi.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = 
     }
     t[which]
 }
-
-
