@@ -1,13 +1,6 @@
 #' waldi: Location-adjusted Wald statistic for general model classes
 #'
-#' ADD PACKAGE DESCRIPTION HERE
-#'
-#' @details
-#'
-#' ANY OTHER DETAILS?
-#'
-#' @author Ioannis Kosmidis \email{i.kosmidis@ucl.ac.uk},
-#'         Claudia Di Caterina \email{dicaterina@stat.unipd.it}
+#' The waldi R package provides methods for the computation of the location-adjsuted Wald statistics derived in Di Caterina and Kosmidis <arXiv:1710.11217> for 'glm' and 'brglmFit' abjects, and corresponding methods for location-adjusted Wald confidence intervals.
 #'
 #' @references
 #'
@@ -39,10 +32,7 @@ NULL
 #'
 #' @details
 #'
-#' \code{waldi} stands for "cor"rected "zed"-statistic.
-#'
-#' @author Ioannis Kosmidis \email{i.kosmidis@ucl.ac.uk},
-#'         Claudia Di Caterina \email{dicaterina@stat.unipd.it}
+#' ADD DETAILS HERE
 #'
 #' @seealso \code{\link{waldi.glm}}
 #'

@@ -1,4 +1,5 @@
-#' Location-adjusted Wald statistics for \code{\link{glm}} objects
+#' Location-adjusted Wald statistics for \code{\link{glm}} and
+#' \code{\link[brglm2]{brglmFit}} objects
 #'
 #' @inheritParams waldi
 #'

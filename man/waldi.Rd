@@ -35,7 +35,7 @@ Generic method for computing location-adjusted Wald statistics for
 the parameters of general models
 }
 \details{
-\code{waldi} stands for "cor"rected "zed"-statistic.
+ADD DETAILS HERE
 }
 \references{
 Di Caterina C, Kosmidis I (2017). Location-adjusted Wald statistic
@@ -43,8 +43,4 @@ for scalar parameters *arXiv*, **arXiv:1710.11217**
 }
 \seealso{
 \code{\link{waldi.glm}}
-}
-\author{
-Ioannis Kosmidis \email{i.kosmidis@ucl.ac.uk},
-        Claudia Di Caterina \email{dicaterina@stat.unipd.it}
 }

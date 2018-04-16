@@ -50,9 +50,8 @@
 #'
 #' @export
 waldi_confint <- function(object, level = 0.95, adjust = TRUE, which,
-                           parallel = TRUE, numeric = TRUE,
-                           length = 20, return_values = FALSE) {
-
+                          parallel = TRUE, numeric = TRUE,
+                          length = 20, return_values = FALSE) {
     ci <- function(j) {
         stat <- function(b) {
             waldi(object, null = b, adjust = adjust, which = j)
@@ -70,7 +69,6 @@ waldi_confint <- function(object, level = 0.95, adjust = TRUE, which,
             approx(sp$y, sp$x, xout = -cutoff)$y
         }
     }
-
     cis <- confint.default(object, level = level)
     len <- apply(cis, 1, diff)
     par_names <- rownames(cis)
@@ -98,7 +96,6 @@ waldi_confint <- function(object, level = 0.95, adjust = TRUE, which,
     else {
         out <- foreach::`%do%`(foreach_object, if (aliased[i]) NAout else ci(i))
     }
-
     if (!return_values) {
         rownames(out) <- par_names[which]
         colnames(out) <- pct

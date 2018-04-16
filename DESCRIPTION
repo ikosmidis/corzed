@@ -1,9 +1,9 @@
 Package: waldi
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: c(person("Ioannis", "Kosmidis", email = "i.kosmidis@ucl.ac.uk", role = c("aut", "cre")),
+Title: Location-adjusted Wald statistics and confidence intervals
+Version: 0.0.9000
+Authors@R: c(person("Ioannis", "Kosmidis", email = "ioannis.kosmidis@warwick.ac.uk", role = c("aut", "cre")),
 	     person("Claudia", "Di Caterina", email = "dicaterina@stats.unipd.it", role = c("aut")))
-Description: WHAT THE PACKAGE DOES (ONE PARAGRAPH).
+Description: Provides methods for the computation of the location-adjsuted Wald statistics derived in Di Caterina and Kosmidis <arXiv:1710.11217> for 'glm' and 'brglmFit' abjects, and corresponding methods for location-adjusted Wald confidence intervals.
 Depends: R (>= 3.4.2)
 License: GPL-2 | GPL-3
 Encoding: UTF-8

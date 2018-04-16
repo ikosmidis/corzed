@@ -2,7 +2,8 @@
 % Please edit documentation in R/waldi_glm.R
 \name{waldi.glm}
 \alias{waldi.glm}
-\title{Location-adjusted Wald statistics for \code{\link{glm}} objects}
+\title{Location-adjusted Wald statistics for \code{\link{glm}} and
+\code{\link[brglm2]{brglmFit}} objects}
 \usage{
 \method{waldi}{glm}(object, null = 0, adjust = TRUE, which = NULL,
   parallel = FALSE, numeric = TRUE, ...)
@@ -33,7 +34,8 @@ computation of the location-adjusted statistics? Default is \code{TRUE}}
 \item{...}{further arguments to be passed to or from other methods}
 }
 \description{
-Location-adjusted Wald statistics for \code{\link{glm}} objects
+Location-adjusted Wald statistics for \code{\link{glm}} and
+\code{\link[brglm2]{brglmFit}} objects
 }
 \examples{
 clotting <- data.frame(
