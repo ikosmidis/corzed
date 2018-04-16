@@ -35,7 +35,7 @@ Generic method for computing location-adjusted Wald statistics for
 the parameters of general models
 }
 \details{
-ADD DETAILS HERE
+ADD TECHINCAL DETAILS HERE
 }
 \references{
 Di Caterina C, Kosmidis I (2017). Location-adjusted Wald statistic

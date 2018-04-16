@@ -32,7 +32,7 @@ NULL
 #'
 #' @details
 #'
-#' ADD DETAILS HERE
+#' ADD TECHINCAL DETAILS HERE
 #'
 #' @seealso \code{\link{waldi.glm}}
 #'
