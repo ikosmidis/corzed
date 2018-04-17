@@ -46,6 +46,7 @@
 #' with(out_wald, points(grid, value, type = "l", col = "blue"))
 #' abline(a = qnorm(0.975), b = 0, lty = 2)
 #' abline(a = qnorm(0.025), b = 0, lty = 2)
+#' legend(x = "topright", legend = c(expression(t), expression(t^'*')), col = c("blue", "red"), lty = 1)
 #' }
 #'
 #' @export
