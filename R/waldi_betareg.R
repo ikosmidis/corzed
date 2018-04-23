@@ -12,6 +12,8 @@
 #' @export
 waldi.betareg <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE, numerical = TRUE, ...) {
 
+    br <- object$type %in% c("BC", "BR")
+
     adj_t_numeric <- function(j) {
         u <- numDeriv::grad(kappa, theta, j = j)
         V <- numDeriv::hessian(kappa, theta, j = j)
@@ -32,11 +34,13 @@ waldi.betareg <- function(object, null = 0, adjust = TRUE, which = NULL, paralle
     aliased <- is.na(theta)
     p_all <- length(theta)
     theta_ind <- seq.int(p_all)
-    ## Compute inverse Fisher information, standard errors and t values
-    F_inds <- c(theta_ind[!aliased], p_all + 1)
-    F <- matrix(NA, p_all + 1, p_all + 1)
 
-    F[F_inds, F_inds] <- solve(info(theta, phi, type = "expected")[F_inds, F_inds])
+
+    ## Compute inverse Fisher information, standard errors and t values
+    F_inds <- theta_ind[!aliased]
+    F <- matrix(NA, p_all, p_all)
+
+    F[F_inds, F_inds] <- solve(info(theta)[F_inds, F_inds])
     ses <- sqrt(diag(F))[1L:p_all]
     t <- (theta - null)/ses
     theta_names <- names(theta)
@@ -56,13 +60,12 @@ waldi.betareg <- function(object, null = 0, adjust = TRUE, which = NULL, paralle
     }
     ## otherwise continue to the computation of the adjustment (need
     ## bias at the mle and information function)
-    b <- object$auxiliary_functions$bias(theta)
+    b <- if (br) 0 else object$auxiliary_functions$bias(theta)
 
     theta[is.na(theta)] <- 0
     kappa <- function(par, j) {
-        inv_i <- matrix(NA, p_all + 1, p_all + 1)
-        inv_i[F_inds, F_inds] <- solve(info(par[-(p_all + 1)], par[p_all + 1],
-                                            type = "expected")[F_inds, F_inds])
+        inv_i <- matrix(NA, p_all, p_all)
+        inv_i[F_inds, F_inds] <- solve(info(par)[F_inds, F_inds])
         sqrt(inv_i[j, j])
     }
 

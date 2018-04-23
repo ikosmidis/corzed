@@ -15,8 +15,8 @@ Suggests: foreach,
 	  knitr,
           rmarkdown,
 	  covr
-Enhances: brglm2
-Imports: enrichwith
+Enhances: brglm2, betareg
+Imports: enrichwith, foreach
 VignetteBuilder: knitr
 URL: https://github.com/ikosmidis/waldi
 BugReports: https://github.com/ikosmidis/waldi/issues
