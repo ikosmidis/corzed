@@ -42,5 +42,5 @@ Di Caterina C, Kosmidis I (2017). Location-adjusted Wald statistic
 for scalar parameters *arXiv*, **arXiv:1710.11217**
 }
 \seealso{
-\code{\link{waldi.glm}}
+\code{\link{waldi.glm}} \code{\link{waldi.betareg}}
 }

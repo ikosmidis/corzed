@@ -35,7 +35,7 @@ NULL
 #'
 #' ADD TECHINCAL DETAILS HERE
 #'
-#' @seealso \code{\link{waldi.glm}}
+#' @seealso  \code{\link{waldi.glm}} \code{\link{waldi.betareg}}
 #'
 #' @references
 #'
