@@ -1,6 +1,13 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^README\.Rmd$
-^README-.*\.png$
 inst/supplementary_1710-11217
 tests
+^README\.Rmd$
+^\.travis\.yml$
+^codecov\.yml$
+^CONDUCT\.md$
+README.md
+README_files/.*\.png$
+README_files
+README.html
+^CONDUCT\.md$

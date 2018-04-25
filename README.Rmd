@@ -37,3 +37,7 @@ devtools::install_github("ikosmidis/waldi")
 Location-adjusted Wald statistics are defned in
 
 Di Caterina, C and Kosmidis, I (2017). Location-Adjusted Wald Statistic for Scalar Parameters. ArXiv E-Prints. [arXiv:1710.11217](https://arxiv.org/abs/1710.11217).
+
+### Code of Conduct
+
+Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.
