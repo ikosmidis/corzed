@@ -10,6 +10,7 @@
 #' @docType package
 #' @name waldi-package
 #' @import enrichwith
+#' @importFrom stats approx coef confint.default make.link model.matrix predict qnorm spline weights
 NULL
 
 #' Generic method for computing location-adjusted Wald statistics for
@@ -44,4 +45,8 @@ NULL
 #' @export
 waldi <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE, ...) {
     UseMethod("waldi")
+}
+
+if(getRversion() >= "2.15.1")  {
+    utils::globalVariables(c("i"))
 }

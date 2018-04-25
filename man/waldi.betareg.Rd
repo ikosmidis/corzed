@@ -2,7 +2,7 @@
 % Please edit documentation in R/waldi_betareg.R
 \name{waldi.betareg}
 \alias{waldi.betareg}
-\title{Location-adjusted Wald statistics for \code{\link{betareg}} objects}
+\title{Location-adjusted Wald statistics for \code{betareg} objects}
 \usage{
 \method{waldi}{betareg}(object, null = 0, adjust = TRUE, which = NULL,
   parallel = FALSE, numerical = TRUE, ...)
@@ -33,11 +33,5 @@ computation of the location-adjusted statistics? Default is \code{TRUE}. Current
 \item{...}{further arguments to be passed to or from other methods}
 }
 \description{
-Location-adjusted Wald statistics for \code{\link{betareg}} objects
-}
-\examples{
-
-}
-\seealso{
-\code{\link[betareg] {betareg}}; \code{\link[betareg]{summary.betareg}}
+Location-adjusted Wald statistics for \code{betareg} objects
 }

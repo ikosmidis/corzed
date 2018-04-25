@@ -1,6 +1,7 @@
 #' Confidence intervals by inversion of the location-adjusted Wald statistic
 #'
 #' @inheritParams waldi
+#' @inheritParams waldi.glm
 #'
 #' @param level the confidence level required. Default is 0.95
 #'
@@ -46,16 +47,17 @@
 #' with(out_wald, points(grid, value, type = "l", col = "blue"))
 #' abline(a = qnorm(0.975), b = 0, lty = 2)
 #' abline(a = qnorm(0.025), b = 0, lty = 2)
-#' legend(x = "topright", legend = c(expression(t), expression(t^'*')), col = c("blue", "red"), lty = 1)
+#' legend(x = "topright", legend = c(expression(t), expression(t^'*')),
+#'        col = c("blue", "red"), lty = 1)
 #' }
 #'
 #' @export
 waldi_confint <- function(object, level = 0.95, adjust = TRUE, which,
-                          parallel = TRUE, numeric = TRUE,
+                          parallel = TRUE, numerical = TRUE,
                           length = 20, return_values = FALSE) {
     ci <- function(j) {
         stat <- function(b) {
-            waldi(object, null = b, adjust = adjust, which = j)
+            waldi(object, null = b, adjust = adjust, which = j, numerical = numerical)
         }
         bs <- seq(low[j], upp[j], length = length)
         if (aliased[j]) {

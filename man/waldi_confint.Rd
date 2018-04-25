@@ -5,7 +5,7 @@
 \title{Confidence intervals by inversion of the location-adjusted Wald statistic}
 \usage{
 waldi_confint(object, level = 0.95, adjust = TRUE, which, parallel = TRUE,
-  numeric = TRUE, length = 20, return_values = FALSE)
+  numerical = TRUE, length = 20, return_values = FALSE)
 }
 \arguments{
 \item{object}{a fitted model object (e.g. the result of a
@@ -24,6 +24,9 @@ parameters}
 
 \item{parallel}{if \code{TRUE}, the statistics are computed in
 parallel using the backend provided to \code{\link{foreach}}}
+
+\item{numerical}{shall numerical derivatives be used for the
+computation of the location-adjusted statistics? Default is \code{TRUE}}
 
 \item{length}{The length of the grid on which the location-adjusted
 statistic is evaluated. Default is 20. See details.}
@@ -64,7 +67,8 @@ with(out_waldi, plot(grid, value, type = "l", col = "red"))
 with(out_wald, points(grid, value, type = "l", col = "blue"))
 abline(a = qnorm(0.975), b = 0, lty = 2)
 abline(a = qnorm(0.025), b = 0, lty = 2)
-legend(x = "topright", legend = c(expression(t), expression(t^'*')), col = c("blue", "red"), lty = 1)
+legend(x = "topright", legend = c(expression(t), expression(t^'*')),
+       col = c("blue", "red"), lty = 1)
 }
 
 }

@@ -1,13 +1,9 @@
-#' Location-adjusted Wald statistics for \code{\link{betareg}} objects
+#' Location-adjusted Wald statistics for \code{betareg} objects
 #'
 #' @inheritParams waldi
 #'
 #' @param numerical shall numerical derivatives be used for the
 #'     computation of the location-adjusted statistics? Default is \code{TRUE}. Currently unused.
-#'
-#' @seealso \code{\link[betareg] {betareg}}; \code{\link[betareg]{summary.betareg}}
-#'
-#' @examples
 #'
 #' @export
 waldi.betareg <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE, numerical = TRUE, ...) {
