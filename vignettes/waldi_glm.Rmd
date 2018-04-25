@@ -1,6 +1,6 @@
 ---
 title: "Location-adjusted Wald statistics for generalized linear models"
-author: "[Ioannis Kosmidis](http://www.ucl.ac.uk/~ucakiko/), [Claudia Di Caterina]()"
+author: "[Ioannis Kosmidis](http://www.ucl.ac.uk/~ucakiko/), Claudia Di Caterina"
 date:  "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
