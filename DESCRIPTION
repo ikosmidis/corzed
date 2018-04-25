@@ -4,17 +4,14 @@ Version: 0.0.9000
 Authors@R: c(person("Ioannis", "Kosmidis", email = "ioannis.kosmidis@warwick.ac.uk", role = c("aut", "cre")),
 	     person("Claudia", "Di Caterina", email = "dicaterina@stats.unipd.it", role = c("aut")))
 Description: Provides methods for the computation of the location-adjusted Wald statistics derived in Di Caterina and Kosmidis <arXiv:1710.11217> for 'glm', 'brglmFit' <https://CRAN.R-project.org/package=brglm2> and 'betareg' <https://CRAN.R-project.org/package=beareg>) objects, and corresponding methods for location-adjusted Wald confidence intervals.
+URL: https://github.com/ikosmidis/waldi
+BugReports: https://github.com/ikosmidis/waldi/issues
 Depends: R (>= 3.4.2)
-License: GPL-2 | GPL-3
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
-Suggests: testthat,
-	  knitr,
-          rmarkdown,
-	  covr
+Suggests: testthat, knitr, rmarkdown, covr
 Enhances: brglm2, betareg
 Imports: enrichwith, foreach, numDeriv
 VignetteBuilder: knitr
-URL: https://github.com/ikosmidis/waldi
-BugReports: https://github.com/ikosmidis/waldi/issues
