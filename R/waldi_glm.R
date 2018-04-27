@@ -50,7 +50,7 @@ waldi.glm <- function(object, null = 0, adjust = TRUE, which = NULL, parallel = 
              prods[, u] %*% F %*% prods[, v] - 0.5 * Fj %*% d2_info(u, v) %*% Fj
         }
         u <- -0.5 * drop(Fj %*% prods) / ses[j]
-        V <- -outer(u, u) / ses[j] + outer(p_inds, p_inds, Vectorize(v2)) / ses[j]
+        V <- -tcrossprod(u) / ses[j] + outer(p_inds, p_inds, Vectorize(v2)) / ses[j]
         a <- -t[j] * u
         a[j] <- 1 + a[j]
         t[j] - sum(a * b, na.rm = TRUE)/ses[j] +
