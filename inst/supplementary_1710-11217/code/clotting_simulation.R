@@ -9,14 +9,17 @@
 ## This code still has lots of rough edges, some of which are
 ## indicated by the embedded comments.
 
-## Specify path; make sure that path has a directory named results
-path <- "."
-source(paste(path, "corzed.R", sep = "/"))
-
+## devtools::install_github("ikosmidis/waldi")
+library("waldi")
 library("enrichwith")
+library("brglm2")
 library("plyr")
 library("dplyr")
 library("doMC")
+
+
+## Specify path; make sure that path has a directory named results
+path <- "."
 
 ## Specify number of cores, simulation size and set seed
 registerDoMC(3)
@@ -46,15 +49,18 @@ simu_data$sample <- seq.int(nsimu)
 res <- ddply(simu_data, ~ sample, function(response) {
     temp_data <- clotting
     temp_data$conc <- unlist(response[-(n_obs + 1)])
-    temp_fit <- update(model_fit, data = temp_data)
-    zstat_mle <- corzed(temp_fit, null = coef(model_fit), correction = FALSE)
-    zstat_cor <- corzed(temp_fit, null = coef(model_fit), correction = TRUE)
-    zstat_mom <- (coef(temp_fit) - coef(model_fit))/sqrt(diag(vcov(temp_fit)))
+    temp_ml_fit <- update(model_fit, data = temp_data)
+    temp_br_fit <- update(model_fit, data = temp_data, method = "brglmFit")
+    zstat_ml <- waldi(temp_ml_fit, null = coef(model_fit), adjust = FALSE, numerical = FALSE)
+    zstat_ml_cor <- waldi(temp_ml_fit, null = coef(model_fit), adjust  = TRUE, numerical = FALSE)
+    zstat_rb <- waldi(temp_br_fit, null = coef(model_fit), adjust  = FALSE, numerical = FALSE)
+    zstat_rb_cor <- waldi(temp_br_fit, null = coef(model_fit), adjust  = TRUE, numerical = FALSE)
+    zstat_mom <- (coef(temp_ml_fit) - coef(model_fit))/sqrt(diag(vcov(temp_ml_fit)))
     if (response$sample %% 100 == 0)
         cat(response$sample, "\n")
-    data.frame(statistic = rep(c("mle", "mom", "cor"), each = n_par),
-               value = c(zstat_mle, zstat_mom, zstat_cor),
-               parameter = rep(1:4, times = 3))
+    data.frame(statistic = rep(c("ml", "ml_cor", "rb", "rb_cor", "mom"), each = n_par),
+               value = c(zstat_ml, zstat_ml_cor, zstat_rb, zstat_rb_cor, zstat_mom),
+               parameter = rep(1:4, times = 5))
 }, .parallel = TRUE)
 
 save(nsimu, clotting, model_fit, clotting_simulate, simu_data, n_obs, n_par, simu_data, res,

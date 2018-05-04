@@ -11,8 +11,8 @@
 
 ## Specify path; make sure that path has a directory named results
 path <- "."
-source(paste(path, "corzed.R", sep = "/"))
 
+library("waldi")
 library("betareg")
 library("enrichwith")
 library("plyr")
@@ -23,7 +23,7 @@ library("brglm2")
 library("ggplot2")
 
 ## Specify number of cores, simulation size and set seed
-registerDoMC(3)
+registerDoMC(7)
 nsimu <- 50000
 set.seed(123)
 
@@ -57,10 +57,10 @@ res <- ddply(simu_data, ~ sample, function(response) {
     ## temp_data$yield <- unlist(response[-(n_obs + 1)])
     temp_fit <- try(update(rs_beta, data = temp_data))
     if (inherits(temp_fit, "try-error")) {
-        zstat_cor <- zstat_mle <- zstat_mle_obs <- zstat_bc <- rep(NA, length(coef(rs_beta)))
+        zstat_mle_cor <- zstat_mle <- zstat_mle_obs <- zstat_bc <- zstat_bc_cor <- zstat_br <- zstat_br_cor <- rep(NA, length(coef(rs_beta)))
     }
     else {
-        zstat_cor <- corzed(temp_fit, null = coefs, correction = TRUE)
+        zstat_mle_cor <- waldi(temp_fit, null = coefs, adjust = TRUE)
         temp_fit_hess <- update(temp_fit, hessian = TRUE, start = coef(temp_fit))
         ## zstat_cor_obs <- corzed(temp_fit_hess, null = coefs, correction = TRUE, use_observed = TRUE)
         temp_coefs <- coef(temp_fit)
@@ -68,15 +68,21 @@ res <- ddply(simu_data, ~ sample, function(response) {
         zstat_mle <- (temp_coefs - coefs)/sqrt(diag(vcov(temp_fit)))
         ## MLE + observed
         zstat_mle_obs <- (temp_coefs - coefs)/sqrt(diag(vcov(temp_fit_hess)))
+        ## BC
         temp_fit_BC <- update(temp_fit, type = "BC")
         zstat_bc <- (coef(temp_fit_BC) - coefs)/sqrt(diag(vcov(temp_fit_BC)))
+        zstat_bc_cor <- waldi(temp_fit_BC, null = coefs, adjust = TRUE)
+        ## BR
+        temp_fit_BR <- update(temp_fit, type = "BR")
+        zstat_br <- (coef(temp_fit_BR) - coefs)/sqrt(diag(vcov(temp_fit_BR)))
+        zstat_br_cor <- waldi(temp_fit_BR, null = coefs, adjust = TRUE)
     }
     if (response$sample %% 100 == 0)
         cat(response$sample, "\n")
     data.frame(
-        statistic = rep(c("mle", "mle+obs", "bc", "cor"), each = n_par),
-        value = c(zstat_mle, zstat_mle_obs, zstat_bc, zstat_cor),
-        parameter = rep(seq.int(n_par), times = 4))
+        statistic = rep(c("mle", "mle+obs", "bc", "br", "mle_cor", "bc_cor", "br_cor"), each = n_par),
+        value = c(zstat_mle, zstat_mle_obs, zstat_bc, zstat_br, zstat_mle_cor, zstat_bc_cor, zstat_br_cor),
+        parameter = rep(seq.int(n_par), times = 7))
 }, .parallel = TRUE)
 
 save(nsimu, rs_beta, simulate_rs_beta, simu_data, n_obs, n_par, simu_data, res,
