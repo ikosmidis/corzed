@@ -218,7 +218,6 @@ ggplot(plot_data) +
     theme(text=element_text(size = 11))
 ```
 
-
 # Coverage and length of confidence intervals for a binomial proportion
 This section provides evidence for the stated coverage and expected length properties of confidence intervals for a binomial proportion in Section~7 of the main text. The code chunk below computes and visualised the coverage and expected length of the $95\%$ confindence intervals
 $\bar{y} \pm z_{0.975} \sqrt{\bar{y} (1 - \bar{y})/n}$ (Wald),

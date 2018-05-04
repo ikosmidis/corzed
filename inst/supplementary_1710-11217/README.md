@@ -24,3 +24,5 @@ An R markdown file that fully reproduces the numerical results and
 outputs in [arXiv:1710.11217](https://arxiv.org/abs/1710.11217) and
 includes supplementary and enriched outputs from the numerical
 computations and simulation experiments therein.
+
+The corresponding output is in `corzed_2_supplementary_code.pdf` and `corzed_2_supplementary_code.html`
