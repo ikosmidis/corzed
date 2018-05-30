@@ -1,4 +1,4 @@
-## Code from plyr 1.8.4.9000
+## Code adapted from plyr 1.8.4.9000
 
 setup_parallel <- function() {
   if (!requireNamespace("foreach", quietly = TRUE)) {
