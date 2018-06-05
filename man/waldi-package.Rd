@@ -5,7 +5,7 @@
 \alias{waldi-package}
 \title{waldi: Location-adjusted Wald statistic for general model classes}
 \description{
-The waldi R package provides methods for the computation of the location-adjsuted Wald statistics derived in Di Caterina and Kosmidis <arXiv:1710.11217> for 'glm' and 'brglmFit' abjects, and corresponding methods for location-adjusted Wald confidence intervals.
+The waldi R package provides methods for the computation of the location-adjsuted Wald statistics derived in Di Caterina and Kosmidis <arXiv:1710.11217> for 'glm' and 'brglmFit' objects, and corresponding methods for location-adjusted Wald confidence intervals.
 }
 \references{
 Di Caterina C, Kosmidis I (2017). Location-adjusted Wald statistic
