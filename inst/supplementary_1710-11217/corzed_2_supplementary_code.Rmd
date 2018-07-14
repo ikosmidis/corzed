@@ -1,7 +1,7 @@
 ---
 title: "Supplemenentary code to reproduce the numerical results in @dicaterina+kosmidis:2017"
 author: "[Ioannis Kosmidis](http://www.ucl.ac.uk/~ucakiko/), Claudia Di Caterina"
-date: 22 Apr 2018
+date: 14 July 2018
 output: rmarkdown::html_vignette
 bibliography: corzed_supplementary_code.bib
 ---
