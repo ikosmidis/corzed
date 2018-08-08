@@ -203,23 +203,31 @@ for (j in seq.int(nrow(settings))) {
 }
 
 plot_data$theta0 <- paste0("theta[0] == ", plot_data$theta0)
-plot_data$theta0 <- factor(plot_data$theta0, levels = unique(plot_data$theta0), ordered = TRUE)
+plot_data$theta0 <- factor(plot_data$theta0, levels = unique(plot_data$theta0),
+                           ordered = TRUE)
 plot_data$m <- paste0("n == ", plot_data$m)
 plot_data$m <- factor(plot_data$m, levels = unique(plot_data$m), ordered = TRUE)
-plot_data$method <- factor(plot_data$method, levels = c("ml", "a_ml", "br", "a_br"), ordered = TRUE)
-plot_data$method <- recode(plot_data$method, "ml" = "italic(t)", "a_ml" = "italic(t)^{'*'}", "br" = "tilde(italic(t))", "a_br" = "tilde(italic(t))^{'*'}")
+plot_data$method <- factor(plot_data$method, levels = c("ml", "a_ml", "br", "a_br"),
+                           ordered = TRUE)
+plot_data$method <- recode(plot_data$method,
+                           "ml" = "italic(t)",
+                           "a_ml" = "italic(t)^{'*'}",
+                           "br" = "tilde(italic(t))",
+                           "a_br" = "tilde(italic(t))^{'*'}")
 
 ggplot(plot_data) +
     geom_abline(aes(intercept = 0, slope = 0), col = "grey") +
     geom_line(aes(z, qnorm(prob) - z), alpha = 0.5) +
     facet_grid(method ~ theta0 + m, label = label_parsed) +
     theme_minimal() +
-    labs(y = expression(paste(Phi^list(-1),(italic(G)(italic(z)))-italic(z))), x = expression(italic(z))) +
+    labs(y = expression(paste(Phi^list(-1),(italic(G)(italic(z)))-italic(z))),
+         x = expression(italic(z))) +
     theme(text=element_text(size = 11))
 ```
 
 # Coverage and length of confidence intervals for a binomial proportion
-This section provides evidence for the stated coverage and expected length properties of confidence intervals for a binomial proportion in Section~7 of the main text. The code chunk below computes and visualised the coverage and expected length of the $95\%$ confindence intervals
+
+This section provides evidence for the stated coverage and expected length properties of confidence intervals for a binomial proportion in Section 7 of the main text. The code chunk below computes and visualised the coverage and expected length of the $95\%$ confindence intervals
 $\bar{y} \pm z_{0.975} \sqrt{\bar{y} (1 - \bar{y})/n}$ (Wald),
 $\tilde{p} \pm z_{0.975} \sqrt{\tilde{p} (1 - \tilde{p})/(n + 4)}$, where $\tilde{p} = (\sum{y_i} + 2)/(n + 4)$ (Agresti-Coull; @agresti98 and @agresti00), and the intervals based on the transformation of the endpoints of the confidence intervals for the log-odds based on $\tilde{t}^*$.
 
@@ -232,8 +240,10 @@ df <- ddply(data.frame(m = c(8, 16, 32, 64, 128, 256)), ~ m, function(x) {
     do.call("rbind", cc)
 })
 
-df$m <- factor(paste("m ==", df$m), levels = paste("m ==", sort(unique(df$m))), ordered = TRUE)
-df$method <- factor(df$method, levels = c("wald", "ac", "a_br", "ml", "a_ml", "br"), ordered = TRUE)
+df$m <- factor(paste("m ==", df$m), levels = paste("m ==", sort(unique(df$m))),
+               ordered = TRUE)
+df$method <- factor(df$method, levels = c("wald", "ac", "a_br", "ml", "a_ml", "br"),
+                    ordered = TRUE)
 df$method <- recode(df$method,
                     "wald" = "Wald",
                     "ml" = "italic(t)[trans]",
@@ -255,7 +265,9 @@ ggplot(df %>% filter(method %in% c("Wald", "Agresti-Coull", "tilde(italic(t))^{'
     facet_wrap(~ m, label = label_parsed, scales = "free_y", ncol = 3) +
     scale_colour_manual(values = c("#328900", "#C54E6D", "#0080C5"),
                         name = "",
-                        labels = c("Wald", "Agresti-Coull", bquote(tilde(italic(t))^{'*'}))) +
+                        labels = c("Wald",
+                                   "Agresti-Coull",
+                                   bquote(tilde(italic(t))^{'*'}))) +
     theme_minimal() +
     theme(legend.position = "top")
 ```
@@ -308,7 +320,7 @@ round(cbind(c(clotting_ml_estimates[, 1], dispersion_ml, dispersion_mom),
 
 
 # Figure 3 including rejection probabilities based on $t_j^*$ and the Wald statistic using $\tilde{\phi}$
-`clotting_simulation.rda` below is the output of [`clotting_simulation.R`](`r paste(code_path, "clotting_simulation.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Section 3.3 of @dicaterina+kosmidis:2017
+`clotting_simulation.rda` below is the output of [`clotting_simulation.R`](`r paste(code_path, "clotting_simulation.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Section 8.3 of @dicaterina+kosmidis:2017.
 ```{r}
 load(paste(results_path, "clotting_simulation.rda", sep = "/"))
 
@@ -416,12 +428,14 @@ out2 <- c(
     cor_rb_p = 2 * pnorm(-abs(out1["wald_rb_adjusted"])))
 
 round(matrix(c(out1, out2), ncol = 10, byrow = TRUE,
-             dimnames = list(NULL, c("mle", "rb", "mcle", "wald_ml", "wald_mlc", "wald_rb",
-                                     "r", "rc", "wald_ml_adjusted", "wald_rb_adjusted"))), 4)
+             dimnames = list(NULL,
+                             c("mle", "rb", "mcle", "wald_ml", "wald_mlc",
+                               "wald_rb", "r", "rc", "wald_ml_adjusted",
+                               "wald_rb_adjusted"))), 4)
 ```
 
 # Figure 4
-`babies_simulation.rda` below is the output of [`babies_simulation.R`](`r paste(code_path, "babies_simulation.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Section 3.4 of @dicaterina+kosmidis:2017
+`babies_simulation.rda` below is the output of [`babies_simulation.R`](`r paste(code_path, "babies_simulation.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Section 8.4 of @dicaterina+kosmidis:2017
 ```{r, warning = FALSE}
 load(paste(results_path, "babies_simulation.rda", sep = "/"))
 
@@ -429,7 +443,8 @@ load(paste(results_path, "babies_simulation.rda", sep = "/"))
 set.seed(123)
 babies_bootstrap(babies_ml, R = 1000)$conv
 
-## Compute pvalues from the various statistics account for the existence of bootstrap p-values
+## Compute pvalues from the various statistics account for the existence of bootstrap
+## p-values
 pval <- ddply(res %>% filter(!infinite & !is.na(value) & type != "summary"),
               ~ name,
               function(data) {
@@ -455,7 +470,8 @@ pval <- pval %>%
                                 "left" = "gamma < 0",
                                 "right" = "gamma > 0"),
            name = factor(name,
-                         levels = c("mle", "rbe", "r", "cond", "scorec", "rc", "boot_conv", "cor", "cor_rb"),
+                         levels = c("mle", "rbe", "r", "cond", "scorec", "rc",
+                                    "boot_conv", "cor", "cor_rb"),
                          ordered = TRUE)) %>%
     mutate(name = factor(name,
                          levels = c("mle", "r", "boot_conv", "rbe",
@@ -485,7 +501,8 @@ ggplot(pval) +
     geom_bar(aes(x = sample, y = ..count../2500), fill = "darkgray", alpha = 0.5) +
     facet_grid(test ~ statistic, labeller = label_parsed) +
     theme_bw() +
-    scale_x_discrete(breaks = c("[0,0.05]", "(0.25,0.3]", "(0.5,0.55]", "(0.75,0.8]", "(0.95,1]"),
+    scale_x_discrete(breaks = c("[0,0.05]", "(0.25,0.3]", "(0.5,0.55]",
+                                "(0.75,0.8]", "(0.95,1]"),
                      labels = c(0, 0.25, 0.5, 0.75, 1)) +
     theme(legend.position = "top",
           panel.grid.major.y = element_blank(),
@@ -497,19 +514,22 @@ ggplot(pval) +
     labs(x = expression(paste(italic(p), "-value ")), y = "Density")
 ```
 
-# Mass univariate regression for brain lessions
-`brains_case_study.rda` below is the output of [`brains_case_study.R`](`r paste(code_path, "brains_case_study.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Section XXX of @dicaterina+kosmidis:2017
+# Figure 5
+`brains_case_study.rda` below is the output of [`brains_case_study.R`](`r paste(code_path, "brains_case_study.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Section 9 of @dicaterina+kosmidis:2017
 ```{r}
 source(paste0(code_path, "/", "overlay2_nifti.R"))
 load(paste(results_path, "brains_case_study.rda", sep = "/"))
 
-## Check how many times LR failed, excluding trivial voxels, and compute probability of infinite estimates
+## Check how many times LR failed, excluding trivial voxels, and compute probability of
+## infinite estimates
 fits_mat %>% filter(statistic == "r" & voxel != 1) %>% group_by(parameter) %>%
     summarize(failed = 100 * sum((value == -Inf) * count) / sum(count),
               infinite = 100 * sum(infinite * count) / sum(count))
 
 ## detections
-fits_mat %>% group_by(parameter, statistic) %>% filter(statistic %in% c("z_br", "corz_br")) %>%
+fits_mat %>%
+    group_by(parameter, statistic) %>%
+    filter(statistic %in% c("z_br", "corz_br")) %>%
     summarize(detections = mean(value < -1 | value > 1) * 100)
 
 ## Empirical lesion counts
@@ -522,8 +542,10 @@ cols_counts <-heat_hcl(n = max(lesion_counts, na.rm = TRUE),
                        c = c(80, 50),
                        l = lumin,
                        power = c(0.7, 2))
-overlay2.nifti(white_matter, y = nifti_counts, z = 32, plot.type = "single", plane = "sagittal",
-               col.y = cols_counts, title = "lesion counts per voxel", col.main = "white")
+overlay2.nifti(white_matter, y = nifti_counts, z = 32,
+               plot.type = "single", plane = "sagittal",
+               col.y = cols_counts, title = "lesion counts per voxel",
+               col.main = "white")
 
 ## Significance maps
 param <- "DD"
@@ -556,13 +578,18 @@ for (stat in c("z_br", "corz_br")) {
     main <- switch(stat,
                    z_br = expression(tilde(italic(t))),
                    corz_br = expression(tilde(italic(t))^'*'))
-    overlay2.nifti(white_matter, y = nifti_z, z = 32, plot.type = "single", plane = "sagittal",
-                   col.y = cols, title = main, col.main = "white")
+    overlay2.nifti(white_matter, y = nifti_z, z = 32, plot.type = "single",
+                   plane = "sagittal", col.y = cols, title = main,
+                   col.main = "white")
 }
 
 ### Plot z_br vs corz_br per parameter
-v1 <- fits_mat %>% filter(statistic == "z_br", parameter == param) %>% select(z_br_value = value, voxel, parameter)
-v2 <- fits_mat %>% filter(statistic == "corz_br", parameter == param) %>% select(corz_br_value = value, voxel, parameter)
+v1 <- fits_mat %>%
+    filter(statistic == "z_br", parameter == param) %>%
+    select(z_br_value = value, voxel, parameter)
+v2 <- fits_mat %>%
+    filter(statistic == "corz_br", parameter == param) %>%
+    select(corz_br_value = value, voxel, parameter)
 v <- join(v1, v2, by = c("voxel", "parameter"))
 ggplot(v) +
     geom_point(aes(x = z_br_value, y = corz_br_value), alpha = 0.1, size = 0.5) +
