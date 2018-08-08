@@ -1,11 +1,4 @@
-## NOT A POLISHED PIECE OF PUBLIC-USE SOFTWARE!  Provided "as is",
-## licensed under GPL2 or higher.  NO WARRANTY OF FITNESS FOR ANY
-## PURPOSE!
-##
-## Ioannis Kosmidis [aut], i.kosmidis@ucl.ac.uk
-##
-## 18 April 2018
-
+## devtools::install_github("ikosmidis/waldi")
 ## Specify path; make sure that path has a directory named results
 path <- "."
 

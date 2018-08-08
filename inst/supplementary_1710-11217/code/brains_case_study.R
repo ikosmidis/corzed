@@ -1,3 +1,7 @@
+## devtools::install_github("ikosmidis/waldi")
+## Specify path; make sure that path has a directory named results
+path <- "."
+
 library("oro.nifti")
 library("parallel")
 library("waldi")

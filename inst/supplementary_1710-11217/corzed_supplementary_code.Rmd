@@ -13,7 +13,7 @@ options(width = 80)
 ```
 
 # Workspace preparation
-This page provides R [@R] code to reproduce the results in the
+This document provides R [@R] code to reproduce the results in the
 manuscript 'Location-adjusted Wald statistic for scalar parameters'
 [@dicaterina+kosmidis:2017].
 

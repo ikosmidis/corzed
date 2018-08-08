@@ -1,15 +1,7 @@
-## NOT A POLISHED PIECE OF PUBLIC-USE SOFTWARE!  Provided "as is",
-## licensed under GPL2 or higher.  NO WARRANTY OF FITNESS FOR ANY
-## PURPOSE!
-##
-## Ioannis Kosmidis [aut], i.kosmidis@ucl.ac.uk
-##
-## 26 October 2017
-##
-## This code still has lots of rough edges, some of which are
-## indicated by the embedded comments.
-
 ## devtools::install_github("ikosmidis/waldi")
+## Specify path; make sure that path has a directory named results
+path <- "."
+
 library("waldi")
 library("enrichwith")
 library("brglm2")
@@ -17,9 +9,6 @@ library("plyr")
 library("dplyr")
 library("doMC")
 
-
-## Specify path; make sure that path has a directory named results
-path <- "."
 
 ## Specify number of cores, simulation size and set seed
 registerDoMC(3)
