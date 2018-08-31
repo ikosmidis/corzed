@@ -1,7 +1,7 @@
 ---
 title: "Supplemenentary code to reproduce the numerical results in @dicaterina+kosmidis:2017"
 author: "[Ioannis Kosmidis](http://www.ucl.ac.uk/~ucakiko/), Claudia Di Caterina"
-date: 14 July 2018
+date: 31 August 2018
 output: rmarkdown::html_vignette
 bibliography: corzed_supplementary_code.bib
 ---
@@ -18,11 +18,18 @@ manuscript 'Location-adjusted Wald statistic for scalar parameters'
 [@dicaterina+kosmidis:2017].
 
 
-This script assumes that the working directory is set to `supplementary_1710-11217`. If you have placed the contents of `supplementary_1710-11217` elsewhere, then change `path` appropriately.
+This script assumes that the current working directory has the sub-directories `code`, `results` and `lesion data` as provided in the supplementary material.
 ```{r path}
 path <- "."
 code_path <- paste(path, "code", sep = "/")
 results_path <- paste(path, "results", sep = "/")
+lesions_path <- paste(path, "lesion data", sep = "/")
+```
+The contents of the directories are as follows
+```{r}
+dir(code_path)
+dir(results_path)
+dir(lesions_path)
 ```
 
 First, make sure that you have the latest version of the **waldi** R package installed.
