@@ -15,6 +15,13 @@
 #' @param return_values Return the values of the statistic on the grid
 #'     instead of confidence intervals? Default is \code{FALSE}
 #'
+#' @param quantiles A \code{length(which)} (or
+#'     \code{length(coef(object))} if \code{which} is not specified)
+#'     times 2 matrix with user-supplied quantiles to be used for the
+#'     inversion of the statistics (e.g. for bootstrap studentized
+#'     intervals). Default is \code{NULL}. If specified, then the
+#'     value for \code{level} is ignored.
+#'
 #' @seealso \code{\link{summary.glm}}
 #'
 #' @examples
@@ -32,7 +39,6 @@
 #' library("foreach")
 #' library("doMC")
 #' registerDoMC(4)
-#' waldi_confint(modML, parallel = TRUE)
 #'
 #' ## Differences between the Wald and location-adjusted Wald statistic
 #' data("babies", package = "waldi")
@@ -52,7 +58,8 @@
 #' }
 #'
 #' @export
-waldi_confint <- function(object, level = 0.95, adjust = TRUE, which,
+waldi_confint <- function(object, level = 0.95, quantiles = NULL,
+                          adjust = TRUE, which,
                           parallel = TRUE, numerical = TRUE,
                           length = 20, return_values = FALSE) {
     ci <- function(j) {
@@ -69,28 +76,38 @@ waldi_confint <- function(object, level = 0.95, adjust = TRUE, which,
         }
         else {
             sp <- spline(x = bs, y = vals)
-            approx(sp$y, sp$x, xout = -cutoff)$y
+            approx(sp$y, sp$x, xout = -cutoff[i, ])$y
         }
     }
     cis <- confint.default(object, level = level)
     len <- apply(cis, 1, diff)
     par_names <- rownames(cis)
+    if (missing(which)) {
+        which <- seq.int(length(coef(object)))
+    }
+    npar <- length(which)
     if (!adjust & !return_values) {
         return(cis[which,])
     }
-    low <- cis[, 1] - len/3
-    upp <- cis[, 2] + len/3
+    low <- cis[, 1] - len/2
+    upp <- cis[, 2] + len/2
     names(low) <- names(upp) <- names(par_names) <- par_names
     aliased <- apply(cis, 1, function(x) all(is.na(x)))
     a <- (1 - level)/2
     a <- c(a, 1 - a)
-    cutoff <- qnorm(a)
+    if (no_quantiles <- is.null(quantiles)) {
+        cutoff <- matrix(qnorm(a), npar, 2, byrow = TRUE)
+        rownames(cutoff) <- par_names[which]
+    }
+    else {
+        if (!isTRUE(nrow(quantiles) == npar) | !isTRUE(ncol(quantiles) == 2)) {
+            stop("quantiles needs to be a ", npar, " times", 2, " matrix.")
+        }
+        cutoff <- quantiles
+    }
     pct <- paste(round(100 * a, 1), "%")
     out_length <- ifelse(return_values, length, 2)
     NAout <- rep(NA, out_length)
-    if (missing(which)) {
-        which <- seq.int(length(coef(object)))
-    }
     foreach_object <- eval(as.call(c(list(quote(foreach::foreach), i = which, .combine = "rbind", .init = NULL))))
     if (parallel) {
         setup_parallel()
@@ -101,7 +118,7 @@ waldi_confint <- function(object, level = 0.95, adjust = TRUE, which,
     }
     if (!return_values) {
         rownames(out) <- par_names[which]
-        colnames(out) <- pct
+        colnames(out) <- if (no_quantiles) pct else c("low", "upper")
     }
     out
 }

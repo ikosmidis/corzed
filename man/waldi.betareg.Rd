@@ -4,8 +4,8 @@
 \alias{waldi.betareg}
 \title{Location-adjusted Wald statistics for \code{betareg} objects}
 \usage{
-\method{waldi}{betareg}(object, null = 0, adjust = TRUE, which = NULL,
-  parallel = FALSE, numerical = TRUE, ...)
+\method{waldi}{betareg}(object, null = 0, adjust = TRUE,
+  which = NULL, parallel = FALSE, numerical = TRUE, ...)
 }
 \arguments{
 \item{object}{a fitted model object (e.g. the result of a

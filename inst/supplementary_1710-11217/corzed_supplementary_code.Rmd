@@ -85,42 +85,34 @@ round(cbind(rs_ml_estimates, rs_br_estimates, rs_ml_cis, rs_br_cis), 3)
 ```
 
 # Table 2
-`dyslexia_simulation.rda` below is the output of [`dyslexia_simulation.R`](`r paste(code_path, "dyslexia_simulation.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Example 1.1 of @dicaterina+kosmidis:2017
+`dyslexia_simulation_group1.rda`, ..., `dyslexia_simulation_group5.rda` are the outputs of [`dyslexia_simulation.R`](`r paste(code_path, "dyslexia_simulation.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Example 1.1 of @dicaterina+kosmidis:2017
 ```{r}
-load(paste(results_path, "dyslexia_simulation.rda", sep = "/"))
+results <- NULL
+for (j in c(1:5)) {
+    load(paste(results_path, paste0("dyslexia_simulation_group", j, ".rda"), sep = "/"))
+    results <- rbind(results, res)
+}
 
-## typeI error
-typeI <- ddply(res, ~ statistic + parameter, function(x) {
-    levels <- c(0.1, 1, 2.5, 5, 10)/100
-    p_value_2sided <- 2 * pnorm(-abs(x$value))
-    p_value_left <- pnorm(x$value)
-    p_value_right <- 1 - pnorm(x$value)
-    rate_2sided <- sapply(levels, function(alpha) mean(p_value_2sided < alpha))
-    rate_left <- sapply(levels, function(alpha) mean(p_value_left < alpha))
-    rate_right <- sapply(levels, function(alpha) mean(p_value_right < alpha))
-    out <- data.frame(
-        test = rep(c("2sided", "left", "right"), each = length(levels)),
-        typeI = c(rate_2sided, rate_left, rate_right),
-        level = rep(levels, times = 3))
-    out
-})
-
-## compute coverage probabilities
-rs_coverage <- typeI %>%
-    filter((statistic %in% c("mle", "br")) &
-           level %in% c(0.1, 0.05, 0.01) &
-           test == "2sided" &
-           parameter %in% c(2, 3, 4, 6, 7)) %>%
-    select(-test) %>%
-    mutate(coverage = round(100 * (1 - typeI), 1)) %>%
-    mutate(level = 100 * (1 - level)) %>%
-    select(-typeI) %>%
-    arrange(level) %>%
+rs_coverage <- results %>%
+    filter(parameter %in% c("dyslexia", "iq", "dyslexia:iq", "(phi)_dyslexia", "(phi)_iq")) %>%
+    filter(statistic %in% c("ml", "br", "ml_cor", "br_cor",
+                            "ml_stud", "ml_cor_stud", "br_stud", "br_cor_stud")) %>%
+    mutate(parameter = recode(parameter,
+                              "dyslexia" = 2, "iq" = 3, "dyslexia:iq" = 4,
+                              "(phi)_dyslexia" = 6, "(phi)_iq" = 7)) %>%
+    mutate(level = 100 * level) %>%
+    group_by(level, statistic, parameter) %>%
+    filter(!duplicated(sample)) %>%
+    summarize(coverage = round(mean(cover) * 100, 1)) %>%
+    as.data.frame() %>%
     reshape(idvar = c("level", "parameter"), v.names = "coverage",
             timevar = "statistic",
             direction = "wide")
-rs_coverage
+
+rs_coverage %>% select(level, parameter, coverage.ml, coverage.br, coverage.ml_cor, coverage.br_cor)
+rs_coverage %>% select(level, parameter, coverage.ml_stud, coverage.br_stud, coverage.ml_cor_stud, coverage.br_cor_stud)
 ```
+
 
 # Figure 1
 ```{r, warning = TRUE}
@@ -171,19 +163,33 @@ ggplot(interpolation) +
 rs_cor_ml_cis <- waldi_confint(rs_beta_ml, level = 0.95, adjust = TRUE)
 rs_cor_br_cis <- waldi_confint(rs_beta_br, level = 0.95, adjust = TRUE)
 
-rs_coverage <- typeI %>%
-    filter((statistic %in% c("mle_cor", "br_cor")) &
-           level %in% c(0.1, 0.05, 0.01) &
-           test == "2sided" &
-           parameter %in% c(2, 3, 4, 6, 7)) %>%
-    select(-test) %>%
-    mutate(coverage = round(100 * (1 - typeI), 1)) %>%
-    mutate(level = 100 * (1 - level)) %>%
-    select(-typeI) %>%
-    arrange(level) %>%
-    reshape(idvar = c("level", "parameter"), v.names = "coverage",
-            timevar = "statistic",
-            direction = "wide")
+## Studentized bootstrap intervals
+quantiles_ml <- dyslexia_bootstrap(rs_beta_ml, R = 100, ncores = 4)$quantiles
+quantiles_br <- dyslexia_bootstrap(rs_beta_br, R = 100, ncores = 4)$quantiles
+
+rs_cor_ml_stud_cis <- waldi_confint(rs_beta_ml, adjust = TRUE,
+                                    quantiles = quantiles_ml$zstat_cor[, c("0.025", "0.975")])
+rs_cor_br_stud_cis <- waldi_confint(rs_beta_br, adjust = TRUE,
+                                    quantiles = quantiles_br$zstat_cor[, c("0.025", "0.975")])
+rs_ml_stud_cis <- waldi_confint(rs_beta_ml, adjust = FALSE,
+                                quantiles = quantiles_ml$zstat[, c("0.025", "0.975")])
+rs_br_stud_cis <- waldi_confint(rs_beta_br, adjust = FALSE,
+                                quantiles = quantiles_br$zstat[, c("0.025", "0.975")])
+
+
+## rs_coverage <- typeI %>%
+##     filter((statistic %in% c("mle_cor", "br_cor")) &
+##            level %in% c(0.1, 0.05, 0.01) &
+##            test == "2sided" &
+##            parameter %in% c(2, 3, 4, 6, 7)) %>%
+##     select(-test) %>%
+##     mutate(coverage = round(100 * (1 - typeI), 1)) %>%
+##     mutate(level = 100 * (1 - level)) %>%
+##     select(-typeI) %>%
+##     arrange(level) %>%
+##     reshape(idvar = c("level", "parameter"), v.names = "coverage",
+##             timevar = "statistic",
+##             direction = "wide")
 
 round(cbind(rs_cor_ml_cis, rs_cor_br_cis), 3)
 rs_coverage

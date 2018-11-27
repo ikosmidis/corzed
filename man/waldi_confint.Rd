@@ -4,14 +4,22 @@
 \alias{waldi_confint}
 \title{Confidence intervals by inversion of the location-adjusted Wald statistic}
 \usage{
-waldi_confint(object, level = 0.95, adjust = TRUE, which, parallel = TRUE,
-  numerical = TRUE, length = 20, return_values = FALSE)
+waldi_confint(object, level = 0.95, quantiles = NULL, adjust = TRUE,
+  which, parallel = TRUE, numerical = TRUE, length = 20,
+  return_values = FALSE)
 }
 \arguments{
 \item{object}{a fitted model object (e.g. the result of a
 \code{\link{glm}} call)}
 
 \item{level}{the confidence level required. Default is 0.95}
+
+\item{quantiles}{A \code{length(which)} (or
+\code{length(coef(object))} if \code{which} is not specified)
+times 2 matrix with user-supplied quantiles to be used for the
+inversion of the statistics (e.g. for bootstrap studentized
+intervals). Default is \code{NULL}. If specified, then the
+value for \code{level} is ignored.}
 
 \item{adjust}{if \code{TRUE} (default) use the location-adjusted
 Wald statistic, if \code{FALSE} use the standard Wald
@@ -52,7 +60,6 @@ waldi_confint(modML, parallel = FALSE)
 library("foreach")
 library("doMC")
 registerDoMC(4)
-waldi_confint(modML, parallel = TRUE)
 
 ## Differences between the Wald and location-adjusted Wald statistic
 data("babies", package = "waldi")

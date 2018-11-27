@@ -10,7 +10,7 @@ Depends: R (>= 3.4.2)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Suggests: testthat, knitr, rmarkdown, covr
 Enhances: brglm2, betareg
 Imports: enrichwith, foreach, numDeriv

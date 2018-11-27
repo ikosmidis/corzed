@@ -5,8 +5,8 @@
 \title{Generic method for computing location-adjusted Wald statistics for
 the parameters of general models}
 \usage{
-waldi(object, null = 0, adjust = TRUE, which = NULL, parallel = FALSE,
-  ...)
+waldi(object, null = 0, adjust = TRUE, which = NULL,
+  parallel = FALSE, ...)
 }
 \arguments{
 \item{object}{a fitted model object (e.g. the result of a
