@@ -60,8 +60,8 @@
 #' @export
 waldi_confint <- function(object, level = 0.95, quantiles = NULL,
                           adjust = TRUE, which,
-                          parallel = TRUE, numerical = TRUE,
-                          length = 20, return_values = FALSE) {
+                          parallel = FALSE, numerical = TRUE,
+                          length = 5, return_values = FALSE) {
     ci <- function(j) {
         stat <- function(b) {
             waldi(object, null = b, adjust = adjust, which = j, numerical = numerical)
@@ -79,18 +79,20 @@ waldi_confint <- function(object, level = 0.95, quantiles = NULL,
             approx(sp$y, sp$x, xout = -cutoff[i, ])$y
         }
     }
-    cis <- confint.default(object, level = level)
+
+    cis <- confint.default(object, level = level + (1 - level)/2)
     len <- apply(cis, 1, diff)
     par_names <- rownames(cis)
     if (missing(which)) {
         which <- seq.int(length(coef(object)))
     }
     npar <- length(which)
-    if (!adjust & !return_values) {
-        return(cis[which,])
-    }
+    ## if (!adjust & !return_values) {
+    ##     return(cis[which,])
+    ## }
     low <- cis[, 1] - len/2
     upp <- cis[, 2] + len/2
+
     names(low) <- names(upp) <- names(par_names) <- par_names
     aliased <- apply(cis, 1, function(x) all(is.na(x)))
     a <- (1 - level)/2

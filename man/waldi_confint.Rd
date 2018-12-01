@@ -5,7 +5,7 @@
 \title{Confidence intervals by inversion of the location-adjusted Wald statistic}
 \usage{
 waldi_confint(object, level = 0.95, quantiles = NULL, adjust = TRUE,
-  which, parallel = TRUE, numerical = TRUE, length = 20,
+  which, parallel = TRUE, numerical = TRUE, length = 10,
   return_values = FALSE)
 }
 \arguments{

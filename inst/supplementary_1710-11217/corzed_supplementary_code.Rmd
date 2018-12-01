@@ -88,7 +88,7 @@ round(cbind(rs_ml_estimates, rs_br_estimates, rs_ml_cis, rs_br_cis), 3)
 `dyslexia_simulation_group1.rda`, ..., `dyslexia_simulation_group5.rda` are the outputs of [`dyslexia_simulation.R`](`r paste(code_path, "dyslexia_simulation.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Example 1.1 of @dicaterina+kosmidis:2017
 ```{r}
 results <- NULL
-for (j in c(1:5)) {
+for (j in c(1,2,3,5)) {
     load(paste(results_path, paste0("dyslexia_simulation_group", j, ".rda"), sep = "/"))
     results <- rbind(results, res)
 }
@@ -102,15 +102,14 @@ rs_coverage <- results %>%
                               "(phi)_dyslexia" = 6, "(phi)_iq" = 7)) %>%
     mutate(level = 100 * level) %>%
     group_by(level, statistic, parameter) %>%
-    filter(!duplicated(sample)) %>%
-    summarize(coverage = round(mean(cover) * 100, 1)) %>%
+    summarize(coverage = round(mean(cover, na.rm = TRUE) * 100, 1)) %>%
     as.data.frame() %>%
-    reshape(idvar = c("level", "parameter"), v.names = "coverage",
-            timevar = "statistic",
+    reshape(idvar = c("statistic", "parameter"), v.names = "coverage",
+            timevar = "level",
             direction = "wide")
 
-rs_coverage %>% select(level, parameter, coverage.ml, coverage.br, coverage.ml_cor, coverage.br_cor)
-rs_coverage %>% select(level, parameter, coverage.ml_stud, coverage.br_stud, coverage.ml_cor_stud, coverage.br_cor_stud)
+rs_coverage %>% filter(statistic %in% c("ml", "br")) %>%
+    select(statistic, parameter, coverage.90, coverage.95, coverage.99)
 ```
 
 
@@ -160,41 +159,74 @@ ggplot(interpolation) +
 
 # Table 3
 ```{r}
-rs_cor_ml_cis <- waldi_confint(rs_beta_ml, level = 0.95, adjust = TRUE)
-rs_cor_br_cis <- waldi_confint(rs_beta_br, level = 0.95, adjust = TRUE)
+rs_cor_ml_cis <- waldi_confint(rs_beta_ml, level = 0.95, adjust = TRUE, parallel = FALSE)
+rs_cor_br_cis <- waldi_confint(rs_beta_br, level = 0.95, adjust = TRUE, parallel = FALSE)
 
 ## Studentized bootstrap intervals
-quantiles_ml <- dyslexia_bootstrap(rs_beta_ml, R = 100, ncores = 4)$quantiles
-quantiles_br <- dyslexia_bootstrap(rs_beta_br, R = 100, ncores = 4)$quantiles
+set.seed(123)
+quantiles_ml <- dyslexia_bootstrap(rs_beta_ml, R = 100, ncores = 1)$quantiles
+quantiles_br <- dyslexia_bootstrap(rs_beta_br, R = 100, ncores = 1)$quantiles
 
-rs_cor_ml_stud_cis <- waldi_confint(rs_beta_ml, adjust = TRUE,
-                                    quantiles = quantiles_ml$zstat_cor[, c("0.025", "0.975")])
-rs_cor_br_stud_cis <- waldi_confint(rs_beta_br, adjust = TRUE,
-                                    quantiles = quantiles_br$zstat_cor[, c("0.025", "0.975")])
-rs_ml_stud_cis <- waldi_confint(rs_beta_ml, adjust = FALSE,
+rs_ml_stud_cis <- waldi_confint(rs_beta_ml, adjust = FALSE, parallel = FALSE,
                                 quantiles = quantiles_ml$zstat[, c("0.025", "0.975")])
-rs_br_stud_cis <- waldi_confint(rs_beta_br, adjust = FALSE,
+rs_br_stud_cis <- waldi_confint(rs_beta_br, adjust = FALSE, parallel = FALSE,
                                 quantiles = quantiles_br$zstat[, c("0.025", "0.975")])
+rs_cor_ml_stud_cis <- waldi_confint(rs_beta_ml, adjust = TRUE, parallel = FALSE,
+                                    quantiles = quantiles_ml$zstat_cor[, c("0.025", "0.975")])
+rs_cor_br_stud_cis <- waldi_confint(rs_beta_br, adjust = TRUE, parallel = FALSE,
+                                    quantiles = quantiles_br$zstat_cor[, c("0.025", "0.975")])
 
+round(rbind(cbind(rs_cor_ml_cis, rs_cor_br_cis),
+            cbind(rs_cor_ml_stud_cis, rs_cor_br_stud_cis)), 3)
 
-## rs_coverage <- typeI %>%
-##     filter((statistic %in% c("mle_cor", "br_cor")) &
-##            level %in% c(0.1, 0.05, 0.01) &
-##            test == "2sided" &
-##            parameter %in% c(2, 3, 4, 6, 7)) %>%
-##     select(-test) %>%
-##     mutate(coverage = round(100 * (1 - typeI), 1)) %>%
-##     mutate(level = 100 * (1 - level)) %>%
-##     select(-typeI) %>%
-##     arrange(level) %>%
-##     reshape(idvar = c("level", "parameter"), v.names = "coverage",
-##             timevar = "statistic",
-##             direction = "wide")
+rs_coverage %>% filter(statistic %in% c("ml", "br")) %>%
+    select(statistic, parameter, coverage.90, coverage.95, coverage.99)
 
-round(cbind(rs_cor_ml_cis, rs_cor_br_cis), 3)
-rs_coverage
+rs_coverage %>% filter(statistic %in% c("ml_stud", "br_stud")) %>%
+    select(statistic, parameter, coverage.90, coverage.95, coverage.99)
+
+rs_coverage %>% filter(statistic %in% c("ml_cor", "br_cor")) %>%
+    select(statistic, parameter, coverage.90, coverage.95, coverage.99)
+
+rs_coverage %>% filter(statistic %in% c("ml_cor_stud", "br_cor_stud")) %>%
+    select(statistic, parameter, coverage.90, coverage.95, coverage.99)
 ```
 
+The following chunk of code reproduces the times for the computation
+of the confidence intervals reports in Section~6.
+```{r}
+system.time({
+    waldi_confint(rs_beta_ml, adjust = TRUE, parallel = FALSE)
+})
+
+simu_fun <- get_simulate_function(rs_beta)
+generate_dyslexia <- function(data, mle) {
+    simu_fun(mle)
+}
+stat <- function(data, psi) {
+    temp <- ReadingSkills
+    temp$accuracy <- data
+    temp_fit <- try(update(rs_beta_ml, data = temp))
+    if (inherits(temp_fit, "try-error")) {
+        rep(NA, 7)
+    }
+    else {
+        waldi(temp_fit, null = psi, adjust = TRUE)
+    }
+}
+
+system.time({
+    stats <- boot(ReadingSkills$accuracy, statistic = stat,
+                  R = 100, sim = "parametric", ran.gen = generate_dyslexia,
+                  mle = coef(rs_beta_ml), psi = coef(rs_beta_ml), ncpus = 1)$t
+    quant <- t(apply(stats, 2, quantile, probs = c(0.025, 0.975), na.rm = TRUE))
+    waldi_confint(rs_beta_ml, adjust = TRUE, parallel = FALSE,
+                  quantiles = quant)
+})
+
+
+
+```
 
 # Figure 2
 ```{r}
