@@ -65,7 +65,6 @@ Some of the code-chunks below load objects from the pre-saved R image files in t
 # Table 1
 ```{r dyslexia}
 data("ReadingSkills", package = "betareg")
-
 ## maximum likelihood estimates and corresponding 95\% Wald confidence intervals
 rs_beta_ml <- betareg(accuracy ~ dyslexia * iq | dyslexia + iq,
                       data = ReadingSkills, type = "ML", hessian = FALSE)
@@ -73,30 +72,24 @@ rs_summary_ml <- coef(summary(rs_beta_ml))
 rs_ml_estimates <- do.call("rbind", lapply(rs_summary_ml,
                                            function(z) z[, c("Estimate", "Std. Error")]))
 rs_ml_cis <- confint(rs_beta_ml)
-
 ## bias corrected fit and corresponding 95\% Wald confidence intervals
 rs_beta_br <- update(rs_beta_ml, type = "BR")
 rs_summary_br <- coef(summary(rs_beta_br))
 rs_br_estimates <- do.call("rbind", lapply(rs_summary_br,
                                            function(z) z[, c("Estimate", "Std. Error")]))
 rs_br_cis <- confint(rs_beta_br)
-
 round(cbind(rs_ml_estimates, rs_br_estimates, rs_ml_cis, rs_br_cis), 3)
 ```
 
 # Table 2
-`dyslexia_simulation_group1.rda`, ..., `dyslexia_simulation_group5.rda` are the outputs of [`dyslexia_simulation.R`](`r paste(code_path, "dyslexia_simulation.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Example 1.1 of @dicaterina+kosmidis:2017
+`dyslexia_simulation.rda` contains the outputs of [`dyslexia_simulation.R`](`r paste(code_path, "dyslexia_simulation.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Example 1.1 of @dicaterina+kosmidis:2017
 ```{r}
-results <- NULL
-for (j in c(1,2,3,5)) {
-    load(paste(results_path, paste0("dyslexia_simulation_group", j, ".rda"), sep = "/"))
-    results <- rbind(results, res)
-}
-
+load(paste(results_path, paste0("dyslexia_simulation.rda"), sep = "/"))
 rs_coverage <- results %>%
     filter(parameter %in% c("dyslexia", "iq", "dyslexia:iq", "(phi)_dyslexia", "(phi)_iq")) %>%
     filter(statistic %in% c("ml", "br", "ml_cor", "br_cor",
-                            "ml_stud", "ml_cor_stud", "br_stud", "br_cor_stud")) %>%
+                            "ml_stud", "ml_cor_stud", "br_stud", "br_cor_stud",
+                            "ml_cor_ses_cor", "br_cor_ses_cor")) %>%
     mutate(parameter = recode(parameter,
                               "dyslexia" = 2, "iq" = 3, "dyslexia:iq" = 4,
                               "(phi)_dyslexia" = 6, "(phi)_iq" = 7)) %>%
@@ -107,7 +100,6 @@ rs_coverage <- results %>%
     reshape(idvar = c("statistic", "parameter"), v.names = "coverage",
             timevar = "level",
             direction = "wide")
-
 rs_coverage %>% filter(statistic %in% c("ml", "br")) %>%
     select(statistic, parameter, coverage.90, coverage.95, coverage.99)
 ```
@@ -119,12 +111,11 @@ rs_cor_ml_cis <- waldi_confint(rs_beta_ml, level = 0.95, adjust = TRUE)
 interpolation <- waldi_confint(rs_beta_ml, level = 0.95,
                                which = rownames(rs_cor_ml_cis),
                                adjust = TRUE,
-                               return_values = TRUE)
-
+                               return_values = TRUE,
+                               length = 20)
 intervals <- data.frame(low = rs_cor_ml_cis[, 1],
                         upp = rs_cor_ml_cis[, 2],
                         parameter = rownames(rs_cor_ml_cis))
-
 interpolation <- interpolation %>%
     filter(!(parameter %in% c("(Intercept)", "(phi)_(Intercept)"))) %>%
     mutate(parameter = recode(parameter,
@@ -133,7 +124,6 @@ interpolation <- interpolation %>%
                               "dyslexia:iq" = "beta[4]",
                               "(phi)_dyslexia" = "gamma[2]",
                               "(phi)_iq" = "gamma[3]"))
-
 intervals <- intervals %>%
     filter(!(parameter %in% c("(Intercept)", "(phi)_(Intercept)"))) %>%
     mutate(parameter = recode(parameter,
@@ -142,7 +132,6 @@ intervals <- intervals %>%
                               "dyslexia:iq" = "beta[4]",
                               "(phi)_dyslexia" = "gamma[2]",
                               "(phi)_iq" = "gamma[3]"))
-
 ggplot(interpolation) +
     geom_point(aes(x = grid, y = value)) +
     geom_line(aes(x = grid, y = value), col = "grey") +
@@ -154,19 +143,17 @@ ggplot(interpolation) +
     theme_minimal() +
     theme(axis.text.x = element_text(size = 7)) +
     labs(x = "parameter value", y = "statistic")
-
 ```
 
 # Table 3
 ```{r}
+## Confidence intervals based on the location-adjusted Wald statistic
 rs_cor_ml_cis <- waldi_confint(rs_beta_ml, level = 0.95, adjust = TRUE, parallel = FALSE)
 rs_cor_br_cis <- waldi_confint(rs_beta_br, level = 0.95, adjust = TRUE, parallel = FALSE)
-
 ## Studentized bootstrap intervals
 set.seed(123)
-quantiles_ml <- dyslexia_bootstrap(rs_beta_ml, R = 100, ncores = 1)$quantiles
-quantiles_br <- dyslexia_bootstrap(rs_beta_br, R = 100, ncores = 1)$quantiles
-
+quantiles_ml <- dyslexia_bootstrap(rs_beta_ml, R = 500, ncores = 1)$quantiles
+quantiles_br <- dyslexia_bootstrap(rs_beta_br, R = 500, ncores = 1)$quantiles
 rs_ml_stud_cis <- waldi_confint(rs_beta_ml, adjust = FALSE, parallel = FALSE,
                                 quantiles = quantiles_ml$zstat[, c("0.025", "0.975")])
 rs_br_stud_cis <- waldi_confint(rs_beta_br, adjust = FALSE, parallel = FALSE,
@@ -178,16 +165,8 @@ rs_cor_br_stud_cis <- waldi_confint(rs_beta_br, adjust = TRUE, parallel = FALSE,
 
 round(rbind(cbind(rs_cor_ml_cis, rs_cor_br_cis),
             cbind(rs_cor_ml_stud_cis, rs_cor_br_stud_cis)), 3)
-
-rs_coverage %>% filter(statistic %in% c("ml", "br")) %>%
-    select(statistic, parameter, coverage.90, coverage.95, coverage.99)
-
-rs_coverage %>% filter(statistic %in% c("ml_stud", "br_stud")) %>%
-    select(statistic, parameter, coverage.90, coverage.95, coverage.99)
-
 rs_coverage %>% filter(statistic %in% c("ml_cor", "br_cor")) %>%
     select(statistic, parameter, coverage.90, coverage.95, coverage.99)
-
 rs_coverage %>% filter(statistic %in% c("ml_cor_stud", "br_cor_stud")) %>%
     select(statistic, parameter, coverage.90, coverage.95, coverage.99)
 ```
@@ -195,11 +174,11 @@ rs_coverage %>% filter(statistic %in% c("ml_cor_stud", "br_cor_stud")) %>%
 The following chunk of code reproduces the times for the computation
 of the confidence intervals reports in Section~6.
 ```{r}
+## Intervals based on the location-adjusted Wald statistic
 system.time({
-    waldi_confint(rs_beta_ml, adjust = TRUE, parallel = FALSE)
+    waldi_confint(rs_beta_ml, adjust = TRUE, parallel = FALSE, length = 5)
 })
-
-simu_fun <- get_simulate_function(rs_beta)
+simu_fun <- get_simulate_function(rs_beta_ml)
 generate_dyslexia <- function(data, mle) {
     simu_fun(mle)
 }
@@ -214,24 +193,20 @@ stat <- function(data, psi) {
         waldi(temp_fit, null = psi, adjust = TRUE)
     }
 }
-
+## Studentized bootstrap intervals
 system.time({
     stats <- boot(ReadingSkills$accuracy, statistic = stat,
-                  R = 100, sim = "parametric", ran.gen = generate_dyslexia,
+                  R = 500, sim = "parametric", ran.gen = generate_dyslexia,
                   mle = coef(rs_beta_ml), psi = coef(rs_beta_ml), ncpus = 1)$t
     quant <- t(apply(stats, 2, quantile, probs = c(0.025, 0.975), na.rm = TRUE))
-    waldi_confint(rs_beta_ml, adjust = TRUE, parallel = FALSE,
+    waldi_confint(rs_beta_br, adjust = TRUE, parallel = FALSE,
                   quantiles = quant)
 })
-
-
-
 ```
 
 # Figure 2
 ```{r}
 source(paste0(code_path, "/", "logodds_functions.R"))
-
 ## Distribution of the statistic against normal
 settings <- expand.grid(m = c(8, 16, 32), theta0 = c(-2, -1, 0))
 plot_data <- NULL
@@ -246,7 +221,6 @@ for (j in seq.int(nrow(settings))) {
     dd$m <- setting$m
     plot_data <- rbind(plot_data, dd)
 }
-
 plot_data$theta0 <- paste0("theta[0] == ", plot_data$theta0)
 plot_data$theta0 <- factor(plot_data$theta0, levels = unique(plot_data$theta0),
                            ordered = TRUE)
@@ -259,7 +233,6 @@ plot_data$method <- recode(plot_data$method,
                            "a_ml" = "italic(t)^{'*'}",
                            "br" = "tilde(italic(t))",
                            "a_br" = "tilde(italic(t))^{'*'}")
-
 ggplot(plot_data) +
     geom_abline(aes(intercept = 0, slope = 0), col = "grey") +
     geom_line(aes(z, qnorm(prob) - z), alpha = 0.5) +
@@ -284,7 +257,6 @@ df <- ddply(data.frame(m = c(8, 16, 32, 64, 128, 256)), ~ m, function(x) {
     cc <- lapply(probs, function(pp) cover_ci_prop(n = m, p = pp, level = 0.95, cis = cis))
     do.call("rbind", cc)
 })
-
 df$m <- factor(paste("m ==", df$m), levels = paste("m ==", sort(unique(df$m))),
                ordered = TRUE)
 df$method <- factor(df$method, levels = c("wald", "ac", "a_br", "ml", "a_ml", "br"),
@@ -303,7 +275,6 @@ ggplot(df %>% filter(method %in% c("Wald", "Agresti-Coull", "tilde(italic(t))^{'
     facet_grid(m ~ method, label = label_parsed) +
     coord_cartesian(ylim = c(0.7, 1)) +
     theme_minimal()
-
 ## expected length
 ggplot(df %>% filter(method %in% c("Wald", "Agresti-Coull", "tilde(italic(t))^{'*'}"))) +
     geom_line(aes(x = p, y = length, col = method), alpha = 0.5, size = 0.8) +
@@ -326,8 +297,6 @@ sapply(28:32, t_br, n =  32, theta0 = 0)
 sapply(28:32, t_adjusted_br, n =  32, theta0 = 0)
 ```
 
-
-
 # Table 4
 ```{r}
 ## The clotting data set
@@ -335,28 +304,22 @@ clotting <- data.frame(
   conc = c(118,58,42,35,27,25,21,19,18,69,35,26,21,18,16,13,12,12),
   u = c(5,10,15,20,30,40,60,80,100, 5,10,15,20,30,40,60,80,100),
   lot = factor(c(rep(1, 9), rep(2, 9))))
-
 ## The maximum likelihood fit of the gamma regression model
 clotting_ml <- glm(conc ~ log(u)*lot, data = clotting, family = Gamma(link = "log"))
-
 ## Maximum likelihood estimates and Wald statistics using maximum likelihood estimator
 ## of the dispersion parameter
 dispersion_ml <- MASS::gamma.dispersion(clotting_ml)
 clotting_summary_ml <- summary(clotting_ml, dispersion = dispersion_ml)
 clotting_ml_estimates <- coef(clotting_summary_ml)[, c("Estimate", "z value")]
-
 ## Reduced-bias estimates and Wald statistics
 clotting_summary_rb <- summary(update(clotting_ml, method = "brglmFit"))
-
 ## Maximum likelihood estimates and Wald statistics using the moment-based estimator
 ## of the dispersion parameter
 clotting_summary_mom <-  summary(clotting_ml)
 dispersion_mom <- clotting_summary_mom$dispersion
 clotting_mom_estimates <- coef(clotting_summary_mom)[, c("Estimate", "t value")]
-
 ## Location-adjusted Wald statistic
 clotting_waldi <- waldi(clotting_ml, null = 0, adjust = TRUE)
-
 round(cbind(c(clotting_ml_estimates[, 1], dispersion_ml, dispersion_mom),
             c(clotting_ml_estimates[, 2], NA, NA),
             c(clotting_mom_estimates[, 2], NA, NA),
@@ -368,7 +331,6 @@ round(cbind(c(clotting_ml_estimates[, 1], dispersion_ml, dispersion_mom),
 `clotting_simulation.rda` below is the output of [`clotting_simulation.R`](`r paste(code_path, "clotting_simulation.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Section 8.3 of @dicaterina+kosmidis:2017.
 ```{r}
 load(paste(results_path, "clotting_simulation.rda", sep = "/"))
-
 ## Compute type I error rates
 typeI <- ddply(res, ~ statistic + parameter, function(x) {
     ## empirical <- pnorm(quantile(x$value, c(0, 1, 2.5, 5, 1)/100))
@@ -385,7 +347,6 @@ typeI <- ddply(res, ~ statistic + parameter, function(x) {
         level = rep(levels, times = 3))
     out
 })
-
 typeI <- typeI %>%
     filter(test != "right") %>%
     mutate(test = recode(test,
@@ -395,7 +356,6 @@ typeI <- typeI %>%
            level_chr = paste(level*100, "~symbol('\045')"),
            upper = typeI - qnorm(1 - 0.01/2)*sqrt(typeI*(1-typeI)/nsimu),
            lower = typeI + qnorm(1 - 0.01/2)*sqrt(typeI*(1-typeI)/nsimu))
-
 ## Figure 2 in the manuscript
 ggplot(typeI %>% filter(parameter != 1)) +
     geom_point(aes(parameter, typeI, pch = statistic), alpha = 0.7) +
@@ -427,21 +387,16 @@ ggplot(typeI %>% filter(parameter != 1)) +
 # Table 5
 ```{r}
 data("babies", package = "cond")
-
 ## clogit understands only 0-1 so expand
 babies_expand <- ddply(babies, ~ lull + day, function(z) {
     data.frame(y = rep(c(0, 1), c(z$r2, z$r1)))
 })
-
 ## Maximum likelihood fit
 babies_ml <- glm(formula = y ~ day + lull - 1,
                  family = binomial, data = babies_expand)
-
 babies_rb <- update(babies_ml, method = "brglmFit")
-
 ## Maximum conditional likelihood fit
 babies_cond <- clogit(y ~ strata(day) + lull, data = babies_expand)
-
 ml <- coef(summary(babies_ml))["lullyes", ]
 rb <- coef(summary(babies_rb))["lullyes", ]
 mcl <- coef(summary(babies_cond))["lullyes", ]
@@ -471,7 +426,6 @@ out2 <- c(
     rc_p = 2 * pnorm(-abs(out1["rc"])),
     cor_ml_p = 2 * pnorm(-abs(out1["wald_ml_adjusted"])),
     cor_rb_p = 2 * pnorm(-abs(out1["wald_rb_adjusted"])))
-
 round(matrix(c(out1, out2), ncol = 10, byrow = TRUE,
              dimnames = list(NULL,
                              c("mle", "rb", "mcle", "wald_ml", "wald_mlc",
@@ -487,7 +441,6 @@ load(paste(results_path, "babies_simulation.rda", sep = "/"))
 ## The bootstrap p-value for the babies data is
 set.seed(123)
 babies_bootstrap(babies_ml, R = 1000)$conv
-
 ## Compute pvalues from the various statistics account for the existence of bootstrap
 ## p-values
 pval <- ddply(res %>% filter(!infinite & !is.na(value) & type != "summary"),
@@ -504,10 +457,8 @@ pval <- ddply(res %>% filter(!infinite & !is.na(value) & type != "summary"),
         data.frame(sample = c(p2, pl, pr),
                    test = rep(c("2sided", "left", "right"), each = length(p2))) }
 })
-
 ## Get rid of left right 2sided from statistic names
 pval <- pval %>% mutate(name = gsub("_left|_right|_2sided", "", name))
-
 pval <- pval %>%
     filter(!(name %in% c("scorec", "boot_prep")) & test != "right") %>%
     mutate(test = dplyr::recode(test,
@@ -533,14 +484,12 @@ pval <- pval %>%
                                      "cor" = "italic(t)^'*'",
                                      "cor_rb" = "tilde(italic(t))^'*'",
                                      "boot_conv" = "italic(boot)"))
-
 ## Bin sample
 breaks <- (0:20)/20
 pval <- pval %>%
     group_by(statistic, test) %>%
     mutate(sample = cut(sample, breaks = breaks, include.lowest = TRUE)) %>%
     group_by(statistic, test, sample)
-
 ggplot(pval) +
     geom_hline(aes(yintercept = 1)) +
     geom_bar(aes(x = sample, y = ..count../2500), fill = "darkgray", alpha = 0.5) +
@@ -570,13 +519,11 @@ load(paste(results_path, "brains_case_study.rda", sep = "/"))
 fits_mat %>% filter(statistic == "r" & voxel != 1) %>% group_by(parameter) %>%
     summarize(failed = 100 * sum((value == -Inf) * count) / sum(count),
               infinite = 100 * sum(infinite * count) / sum(count))
-
 ## detections
 fits_mat %>%
     group_by(parameter, statistic) %>%
     filter(statistic %in% c("z_br", "corz_br")) %>%
     summarize(detections = mean(value < -1 | value > 1) * 100)
-
 ## Empirical lesion counts
 lesion_counts <- colSums(lesions)
 lesion_counts[lesion_counts == 0] <- NA
@@ -591,7 +538,6 @@ overlay2.nifti(white_matter, y = nifti_counts, z = 32,
                plot.type = "single", plane = "sagittal",
                col.y = cols_counts, title = "lesion counts per voxel",
                col.main = "white")
-
 ## Significance maps
 param <- "DD"
 low <- 1
@@ -627,7 +573,6 @@ for (stat in c("z_br", "corz_br")) {
                    plane = "sagittal", col.y = cols, title = main,
                    col.main = "white")
 }
-
 ### Plot z_br vs corz_br per parameter
 v1 <- fits_mat %>%
     filter(statistic == "z_br", parameter == param) %>%
