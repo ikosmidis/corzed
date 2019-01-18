@@ -155,54 +155,5 @@ for (j in seq_along(start)) {
   save.image(paste0("~/clotting_simu", end[j], ".rda"))
 }
 
-## Summary of results
-res_statistics <- ldply(res, function(x) x$stats)
-res_pvalues <- ldply(res, function(x) x$boot_pvalues)
-
-## Type I error rates
-typeI_statistics <- ddply(res_statistics, ~ name + parameter, function(x) {
-  levels <- c(0.1, 1, 2.5, 5)/100
-  p_value_2sided <- 2 * pnorm(-abs(x$value))
-  p_value_left <- pnorm(x$value)
-  p_value_right <- 1 - pnorm(x$value)
-  rate_2sided <- sapply(levels, function(alpha) mean(p_value_2sided < alpha))
-  rate_left <- sapply(levels, function(alpha) mean(p_value_left < alpha))
-  rate_right <- sapply(levels, function(alpha) mean(p_value_right < alpha))
-  out <- data.frame(
-    test = rep(c("2sided", "left", "right"), each = length(levels)),
-    typeI = c(rate_2sided, rate_left, rate_right),
-    level = rep(levels, times = 3))
-  out
-})
-
-typeI_pvalues <- ddply(res_pvalues, ~ statistic + parameter, function(x) {
-  levels <- c(0.1, 1, 2.5, 5)/100
-  rate_2sided <- sapply(levels, function(alpha) mean(x$value[x$type == 
-                                                               'boot_conv_2sided'] < alpha))
-  rate_left <- sapply(levels, function(alpha) mean(x$value[x$type == 
-                                                             'boot_conv_left'] < alpha))
-  rate_right <- sapply(levels, function(alpha) mean(x$value[x$type == 
-                                                              'boot_conv_right'] < alpha))
-  out <- data.frame(
-    test = rep(c("2sided", "left", "right"), each = length(levels)),
-    typeI = c(rate_2sided, rate_left, rate_right),
-    level = rep(levels, times = 3))
-  out
-})
-
-names(typeI_statistics) <- names(typeI_pvalues)
-levels(typeI_pvalues$statistic) <- c("ml_boot", "ml_cor_boot", "mom_boot")
-
-typeI <- rbind(typeI_statistics, typeI_pvalues)
-
-typeI <- typeI %>%
-  filter(test != "right") %>%
-  mutate(test = recode(test,
-                       "2sided" = "H[1]: beta[italic(j)] != beta[paste(italic(j), 0)]",
-                       "left" = "H[1]: beta[italic(j)] < beta[paste(italic(j), 0)]",
-                       "right" = "H[1]: beta[italic(j)] > beta[paste(italic(j), 0)]"),
-         level_chr = paste(level*100, "~symbol('\045')"),
-         upper = typeI - qnorm(1 - 0.01/2)*sqrt(typeI*(1-typeI)/nsimu),
-         lower = typeI + qnorm(1 - 0.01/2)*sqrt(typeI*(1-typeI)/nsimu))
-
-save(typeI, file = paste(path, "results/clotting_simulation.rda", sep = "/"))
+save(res, clotting, model_fit, simu_data, nsimu, n_obs, n_par, clotting_simulate,
+     file = paste(path, "results/clotting_simulation.rda", sep = "/"))
