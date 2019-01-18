@@ -599,6 +599,7 @@ for(K in c(10, 20)) {
   }   
 }
 
+## Summary of results
 res_stats <- ldply(res, function(x) data.frame(x$stats, K = x$K, psi = x$psi))
 res_pvals <- ldply(res, function(x) data.frame(x$pvalues, K = x$K, psi = x$psi))
 
@@ -1245,6 +1246,7 @@ for(psi in c(0.03, 0.07)) {
   }   
 }
 
+## Summary of results
 res_stats <- ldply(res, function(x) data.frame(x$stats, K = x$K, psi = x$psi))
 res_pvals <- ldply(res, function(x) data.frame(x$pvalues, K = x$K, psi = x$psi))
 

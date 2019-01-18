@@ -155,7 +155,7 @@ for (j in seq_along(start)) {
   save.image(paste0("~/clotting_simu", end[j], ".rda"))
 }
 
-
+## Summary of results
 res_statistics <- ldply(res, function(x) x$stats)
 res_pvalues <- ldply(res, function(x) x$boot_pvalues)
 
