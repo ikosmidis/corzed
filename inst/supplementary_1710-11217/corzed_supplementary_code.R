@@ -594,7 +594,7 @@ analytic_time <- system.time(
 
 ## ----metareg, echo = TRUE, message = FALSE, warning = FALSE--------------
 load(paste(results_path, "meta_analysis_simulation.rda", sep = "/"))
-### top row
+
 ## plot K = 10, 20
 fig1 <- ggplot(cov_df_K  %>% filter(test == "2sided")) +
   geom_line(aes(psi, cov, group = statistic, col = statistic), size = 0.5, alpha = 0.8) +
