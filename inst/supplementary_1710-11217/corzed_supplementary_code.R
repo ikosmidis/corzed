@@ -1,5 +1,6 @@
 ## ----setup, include = FALSE----------------------------------------------
-knitr::opts_chunk$set(collapse = T, comment = "#", fig.width=7, fig.height=4, out.width="100%", dpi = 200)
+knitr::opts_chunk$set(collapse = T, comment = "#", fig.width=7, fig.height=4, 
+                      out.width="100%", dpi = 200)
 options(width = 80)
 
 ## ----path----------------------------------------------------------------
@@ -56,7 +57,8 @@ round(cbind(rs_ml_estimates, rs_br_estimates, rs_ml_cis, rs_br_cis), 3)
 ## ------------------------------------------------------------------------
 load(paste(results_path, paste0("dyslexia_simulation.rda"), sep = "/"))
 rs_coverage <- results %>%
-    filter(parameter %in% c("dyslexia", "iq", "dyslexia:iq", "(phi)_dyslexia", "(phi)_iq")) %>%
+    filter(parameter %in% c("dyslexia", "iq", "dyslexia:iq", "(phi)_dyslexia", 
+                            "(phi)_iq")) %>%
     filter(statistic %in% c("ml", "br", "ml_cor", "br_cor",
                             "ml_stud", "ml_cor_stud", "br_stud", "br_cor_stud",
                             "ml_cor_ses_cor", "br_cor_ses_cor")) %>%
@@ -124,9 +126,9 @@ rs_ml_stud_cis <- waldi_confint(rs_beta_ml, adjust = FALSE, parallel = FALSE,
 rs_br_stud_cis <- waldi_confint(rs_beta_br, adjust = FALSE, parallel = FALSE,
                                 quantiles = quantiles_br$zstat[, c("0.025", "0.975")])
 rs_cor_ml_stud_cis <- waldi_confint(rs_beta_ml, adjust = TRUE, parallel = FALSE,
-                                    quantiles = quantiles_ml$zstat_cor[, c("0.025", "0.975")])
+                      quantiles = quantiles_ml$zstat_cor[, c("0.025", "0.975")])
 rs_cor_br_stud_cis <- waldi_confint(rs_beta_br, adjust = TRUE, parallel = FALSE,
-                                    quantiles = quantiles_br$zstat_cor[, c("0.025", "0.975")])
+                      quantiles = quantiles_br$zstat_cor[, c("0.025", "0.975")])
 
 round(rbind(cbind(rs_cor_ml_cis, rs_cor_br_cis),
             cbind(rs_cor_ml_stud_cis, rs_cor_br_stud_cis)), 3)
@@ -198,7 +200,7 @@ ggplot(plot_data) +
     geom_line(aes(z, qnorm(prob) - z), alpha = 0.5) +
     facet_grid(method ~ theta0 + m, label = label_parsed) +
     theme_minimal() +
-    labs(y = expression(paste(Phi^list(-1),(italic(G)(italic(z)))-italic(z))),
+    labs(y = expression(paste(Phi^list(-1),(italic(G)(italic(z))) - italic(z))),
          x = expression(italic(z))) +
     theme(text=element_text(size = 11))
 
@@ -299,11 +301,11 @@ typeI_statistics <- ddply(res_statistics, ~ name + parameter, function(x) {
 typeI_pvalues <- ddply(res_pvalues, ~ statistic + parameter, function(x) {
   levels <- c(0.1, 1, 2.5, 5)/100
   rate_2sided <- sapply(levels, function(alpha) mean(x$value[x$type == 
-                                                               'boot_conv_2sided'] < alpha))
+                                'boot_conv_2sided'] < alpha))
   rate_left <- sapply(levels, function(alpha) mean(x$value[x$type == 
-                                                             'boot_conv_left'] < alpha))
+                              'boot_conv_left'] < alpha))
   rate_right <- sapply(levels, function(alpha) mean(x$value[x$type == 
-                                                              'boot_conv_right'] < alpha))
+                               'boot_conv_right'] < alpha))
   out <- data.frame(
     test = rep(c("2sided", "left", "right"), each = length(levels)),
     typeI = c(rate_2sided, rate_left, rate_right),
@@ -347,7 +349,8 @@ ggplot(typeI %>% filter(parameter != 1, is.element(statistic,
                            x <- round_any(x, scales:::precision(x)/100)
                            scales:::comma(x * 100)
                        }) +
-  scale_shape_manual(name = " ", values = c(16, 17, 15, 3, 4), labels = c(expression(italic(t)), expression(italic(t)^list("*")), 
+  scale_shape_manual(name = " ", values = c(16, 17, 15, 3, 4), 
+                     labels = c(expression(italic(t)), expression(italic(t)^list("*")), 
             expression(paste("Wald with ", tilde(phi))), expression(tilde(italic(t))), 
             expression(tilde(italic(t))^list("*")))) +
     theme_bw() +
@@ -370,7 +373,8 @@ ggplot(typeI %>% filter(parameter != 1, is.element(statistic,
                      labels = c(expression(beta[2]),
                        expression(beta[3]),
                        expression(beta[4]))) +
-  scale_y_continuous(name = expression(paste("Empirical rejection probability (", symbol('\045'), ")")),
+  scale_y_continuous(name = expression(paste("Empirical rejection probability 
+                                             (", symbol('\045'), ")")),
                      labels = function (x) {
                        if (length(x) == 0)
                          return(character())
@@ -378,8 +382,10 @@ ggplot(typeI %>% filter(parameter != 1, is.element(statistic,
                        scales:::comma(x * 100)
                      }) +
   theme_bw() +
-  scale_shape_manual(name = " ", values = c(16, 17, 15, 18), labels = c(expression(italic(t)), expression(italic(t)^list("*")), 
-            expression(paste("Wald with ", tilde(phi))),  expression(italic(t)^list("**")))) +
+  scale_shape_manual(name = " ", values = c(16, 17, 15, 18), 
+              labels = c(expression(italic(t)), expression(italic(t)^list("*")), 
+            expression(paste("Wald with ", tilde(phi))),  
+            expression(italic(t)^list("**")))) +
   theme(legend.position = "top",
         panel.grid.major.y = element_blank(),
         panel.grid.minor.y = element_blank(),
@@ -592,6 +598,22 @@ analytic_time <- system.time(
 )
 (numerical_time/analytic_time)["elapsed"]
 
+## ------------------------------------------------------------------------
+load(paste(results_path, "babies_times.rda", sep = "/"))
+
+times_ana <- sapply(out_ana, function(x) rowMeans(x)["elapsed"])
+times_num <- sapply(out_num, function(x) rowMeans(x)["elapsed"])
+cores <- seq_along(out_num)
+res <- data.frame(times = c(times_ana, times_num), 
+		   cores = c(cores, cores), 
+		   derivatives = rep(c("analytical", "numerical"), each = length(cores)))
+
+ggplot(res) +  
+   geom_line(aes(x = cores, y = times, lty = derivatives)) +
+   geom_point(aes(x = cores, y = times)) +
+   theme_minimal() +
+   labs(x = "cores", y = "elapsed time (sec)")
+
 ## ----metareg, echo = TRUE, message = FALSE, warning = FALSE--------------
 load(paste(results_path, "meta_analysis_simulation.rda", sep = "/"))
 
@@ -606,7 +628,8 @@ fig1 <- ggplot(cov_df_K  %>% filter(test == "2sided")) +
                      labels = c("0.00", "0.02", "0.04", "0.06", "0.08", "0.10")) +
   scale_colour_manual(name = "", values = c("#328900", "#0080C5", "#C54E6D", "purple", 
         "orange", 4), labels = c(expression(italic(t)), expression(italic(t)^list("*")), 
-        expression(tilde(italic(t))), expression(tilde(italic(t))^list("*")), "DL", "ZL")) +
+        expression(tilde(italic(t))), 
+        expression(tilde(italic(t))^list("*")), "DL", "ZL")) +
   theme_bw() +
   theme(legend.position = "top", panel.grid.major.y = element_blank(), 
         panel.grid.minor.y = element_blank(), panel.grid.minor.x = element_blank(), 
@@ -615,16 +638,19 @@ fig1 <- ggplot(cov_df_K  %>% filter(test == "2sided")) +
 
 ## plot psi = 0.03, 0.07
 fig2 <- ggplot(cov_df_psi  %>% filter(test == "2sided")) +
-  geom_line(aes(log(K), cov, group = statistic, col = statistic), size = 0.5, alpha = 0.8) +
+  geom_line(aes(log(K), cov, group = statistic, col = statistic), size = 0.5, 
+            alpha = 0.8) +
   geom_hline(aes(yintercept = 95), col = "grey") +
   facet_wrap( ~ psilab, labeller = label_parsed, scales = "free") +
   labs(y = "Coverage probability (%)", x = expression(italic(K))) +
   lims(y = c(80, 100)) +
-  scale_x_continuous(name = expression(italic(K)), breaks = c(log(5), log(10), log(25), log(50), 
-                    log(100), log(200)), labels = c("5", "10", "25", "50", "100", "200")) +
-  scale_colour_manual(name = "", values = c("#328900", "#0080C5", "#C54E6D", "purple", 
-            "orange", 4), labels = c(expression(italic(t)), expression(italic(t)^list("*")), 
-            expression(tilde(italic(t))), expression(tilde(italic(t))^list("*")), "DL", "ZL")) +
+  scale_x_continuous(name = expression(italic(K)), breaks = c(log(5), log(10), 
+                    log(25), log(50), log(100), log(200)), labels = 
+                      c("5", "10", "25", "50", "100", "200")) +
+  scale_colour_manual(name = "", values = c("#328900", "#0080C5", "#C54E6D", 
+                      "purple", "orange", 4), labels = c(expression(italic(t)), 
+                      expression(italic(t)^list("*")), expression(tilde(italic(t))), 
+                      expression(tilde(italic(t))^list("*")), "DL", "ZL")) +
   theme_bw() +
   theme(legend.position = "none", panel.grid.major.y = element_blank(), 
         panel.grid.minor.y = element_blank(), panel.grid.minor.x = element_blank(), 

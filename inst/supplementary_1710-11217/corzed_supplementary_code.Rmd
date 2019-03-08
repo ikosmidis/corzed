@@ -1,14 +1,15 @@
 ---
 title: "Supplementary code to reproduce the numerical results in @dicaterina+kosmidis:2017"
-author: "[Ioannis Kosmidis](http://www.ucl.ac.uk/~ucakiko/), Claudia Di Caterina"
-date: 18 January 2019
+author: "Claudia Di Caterina, [Ioannis Kosmidis](http://www.ucl.ac.uk/~ucakiko/)"
+date: 8 March 2019
 output: rmarkdown::html_vignette
 bibliography: corzed_supplementary_code.bib
 ---
 
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(collapse = T, comment = "#", fig.width=7, fig.height=4, out.width="100%", dpi = 200)
+knitr::opts_chunk$set(collapse = T, comment = "#", fig.width=7, fig.height=4, 
+                      out.width="100%", dpi = 200)
 options(width = 80)
 ```
 
@@ -17,8 +18,8 @@ This document provides R (R Core Team, 2017) code to reproduce the results in th
 manuscript 'Location-adjusted Wald statistics for scalar parameters'
 by @dicaterina+kosmidis:2017.
 
-
-This script assumes that the current working directory has the sub-directories `code`, `results` and `lesion data` as provided in the supplementary material.
+This script assumes that the current working directory has the sub-directories 
+`code`, `results` and `lesion data` as provided in the supplementary material.
 ```{r path}
 path <- "."
 code_path <- paste(path, "code", sep = "/")
@@ -60,7 +61,14 @@ library("colorspace")
 ```
 
 # Pre-saved R image files
-Some of the code-chunks below load objects from the pre-saved R image files in the [results directory](`r results_path`). These image files are the outputs of the script [`babies_simulation.R`](`r paste(code_path, "babies_simulation.R", sep = "/")`), [`meta_analysis_simulation.R`](`r paste(code_path, "meta_analysis_simulation.R", sep = "/")`), [`clotting_simulation.R`](`r paste(code_path, "clotting_simulation.R", sep = "/")`), [`dyslexia_simulation.R`](`r paste(code_path, "dyslexia_simulation.R", sep = "/")`).
+Some of the code-chunks below load objects from the pre-saved R image files 
+in the [results directory](`r results_path`). These image files are the outputs 
+of the scripts [`babies_simulation.R`](`r paste(code_path, "babies_simulation.R", sep = "/")`),
+[`babies_timings.R`](`r paste(code_path, "babies_timings.R", sep = "/")`),
+[`brains_case_study.R`](`r paste(code_path, "brains_case_study.R", sep = "/")`),
+[`clotting_simulation.R`](`r paste(code_path, "clotting_simulation.R", sep = "/")`), 
+[`dyslexia_simulation.R`](`r paste(code_path, "dyslexia_simulation.R", sep = "/")`),
+[`meta_analysis_simulation.R`](`r paste(code_path, "meta_analysis_simulation.R", sep = "/")`).
 
 
 # Table 1
@@ -83,11 +91,15 @@ round(cbind(rs_ml_estimates, rs_br_estimates, rs_ml_cis, rs_br_cis), 3)
 ```
 
 # Table 2
-`dyslexia_simulation.rda` contains the outputs of [`dyslexia_simulation.R`](`r paste(code_path, "dyslexia_simulation.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Example 1.1 of @dicaterina+kosmidis:2017
+`dyslexia_simulation.rda` contains the outputs of 
+[`dyslexia_simulation.R`](`r paste(code_path, "dyslexia_simulation.R", sep = "/")`) 
+in `r code_path`, which replicates the simulation study described in 
+Example 1.1 of @dicaterina+kosmidis:2017
 ```{r}
 load(paste(results_path, paste0("dyslexia_simulation.rda"), sep = "/"))
 rs_coverage <- results %>%
-    filter(parameter %in% c("dyslexia", "iq", "dyslexia:iq", "(phi)_dyslexia", "(phi)_iq")) %>%
+    filter(parameter %in% c("dyslexia", "iq", "dyslexia:iq", "(phi)_dyslexia", 
+                            "(phi)_iq")) %>%
     filter(statistic %in% c("ml", "br", "ml_cor", "br_cor",
                             "ml_stud", "ml_cor_stud", "br_stud", "br_cor_stud",
                             "ml_cor_ses_cor", "br_cor_ses_cor")) %>%
@@ -160,9 +172,9 @@ rs_ml_stud_cis <- waldi_confint(rs_beta_ml, adjust = FALSE, parallel = FALSE,
 rs_br_stud_cis <- waldi_confint(rs_beta_br, adjust = FALSE, parallel = FALSE,
                                 quantiles = quantiles_br$zstat[, c("0.025", "0.975")])
 rs_cor_ml_stud_cis <- waldi_confint(rs_beta_ml, adjust = TRUE, parallel = FALSE,
-                                    quantiles = quantiles_ml$zstat_cor[, c("0.025", "0.975")])
+                      quantiles = quantiles_ml$zstat_cor[, c("0.025", "0.975")])
 rs_cor_br_stud_cis <- waldi_confint(rs_beta_br, adjust = TRUE, parallel = FALSE,
-                                    quantiles = quantiles_br$zstat_cor[, c("0.025", "0.975")])
+                      quantiles = quantiles_br$zstat_cor[, c("0.025", "0.975")])
 
 round(rbind(cbind(rs_cor_ml_cis, rs_cor_br_cis),
             cbind(rs_cor_ml_stud_cis, rs_cor_br_stud_cis)), 3)
@@ -173,7 +185,7 @@ rs_coverage %>% filter(statistic %in% c("ml_cor_stud", "br_cor_stud")) %>%
 ```
 
 The following chunk of code reproduces the times for the computation
-of the confidence intervals reports in Section 6.
+of the confidence intervals reported in Section 6.
 ```{r, cache = TRUE}
 ## Intervals based on the location-adjusted Wald statistic
 system.time({
@@ -239,16 +251,21 @@ ggplot(plot_data) +
     geom_line(aes(z, qnorm(prob) - z), alpha = 0.5) +
     facet_grid(method ~ theta0 + m, label = label_parsed) +
     theme_minimal() +
-    labs(y = expression(paste(Phi^list(-1),(italic(G)(italic(z)))-italic(z))),
+    labs(y = expression(paste(Phi^list(-1),(italic(G)(italic(z))) - italic(z))),
          x = expression(italic(z))) +
     theme(text=element_text(size = 11))
 ```
 
 # Coverage and length of confidence intervals for a binomial proportion
 
-This section provides evidence for the stated coverage and expected length properties of confidence intervals for a binomial proportion in Section 8 of the main text. The code chunk below computes and visualised the coverage and expected length of the $95\%$ confindence intervals
-$\bar{y} \pm z_{0.975} \sqrt{\bar{y} (1 - \bar{y})/n}$ (Wald),
-$\tilde{p} \pm z_{0.975} \sqrt{\tilde{p} (1 - \tilde{p})/(n + 4)}$, where $\tilde{p} = (\sum{y_i} + 2)/(n + 4)$ (Agresti-Coull; Agresti and Coull, 1998; Agresti and Caffo, 2000), and the intervals based on the transformation of the endpoints of the confidence intervals for the log-odds based on $\tilde{t}^*$.
+This section provides evidence for the stated coverage and expected length properties of 
+confidence intervals for a binomial proportion in Section 8 of the main text. The code 
+chunk below computes and visualises the coverage and expected length of the $95\%$ 
+confindence intervals $\bar{y} \pm z_{0.975} \sqrt{\bar{y} (1 - \bar{y})/n}$ (Wald),
+$\tilde{p} \pm z_{0.975} \sqrt{\tilde{p} (1 - \tilde{p})/(n + 4)}$, where 
+$\tilde{p} = (\sum{y_i} + 2)/(n + 4)$ (Agresti-Coull; Agresti and Coull, 1998; 
+Agresti and Caffo, 2000), and the intervals based on the transformation of the endpoints 
+of the confidence intervals for the log-odds based on $\tilde{t}^*$.
 
 ```{r}
 probs <- seq(1e-08, 1 - 1e-08, length = 500)
@@ -328,7 +345,10 @@ round(cbind(c(clotting_ml_estimates[, 1], dispersion_ml, dispersion_mom),
 
 
 # Figure 3 including rejection probabilities based on $\tilde{t}$ and $\tilde{t}^*$
-`clotting_simulation.rda` below is the output of [`clotting_simulation.R`](`r paste(code_path, "clotting_simulation.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Section 9.3 of @dicaterina+kosmidis:2017.
+`clotting_simulation.rda` below is the output of 
+[`clotting_simulation.R`](`r paste(code_path, "clotting_simulation.R", sep = "/")`) 
+in `r code_path`, which replicates the simulation study described in Section 9.3 of 
+@dicaterina+kosmidis:2017.
 ```{r}
 load(paste(results_path, "clotting_simulation.rda", sep = "/"))
 
@@ -355,11 +375,11 @@ typeI_statistics <- ddply(res_statistics, ~ name + parameter, function(x) {
 typeI_pvalues <- ddply(res_pvalues, ~ statistic + parameter, function(x) {
   levels <- c(0.1, 1, 2.5, 5)/100
   rate_2sided <- sapply(levels, function(alpha) mean(x$value[x$type == 
-                                                               'boot_conv_2sided'] < alpha))
+                                'boot_conv_2sided'] < alpha))
   rate_left <- sapply(levels, function(alpha) mean(x$value[x$type == 
-                                                             'boot_conv_left'] < alpha))
+                              'boot_conv_left'] < alpha))
   rate_right <- sapply(levels, function(alpha) mean(x$value[x$type == 
-                                                              'boot_conv_right'] < alpha))
+                               'boot_conv_right'] < alpha))
   out <- data.frame(
     test = rep(c("2sided", "left", "right"), each = length(levels)),
     typeI = c(rate_2sided, rate_left, rate_right),
@@ -403,7 +423,8 @@ ggplot(typeI %>% filter(parameter != 1, is.element(statistic,
                            x <- round_any(x, scales:::precision(x)/100)
                            scales:::comma(x * 100)
                        }) +
-  scale_shape_manual(name = " ", values = c(16, 17, 15, 3, 4), labels = c(expression(italic(t)), expression(italic(t)^list("*")), 
+  scale_shape_manual(name = " ", values = c(16, 17, 15, 3, 4), 
+                     labels = c(expression(italic(t)), expression(italic(t)^list("*")), 
             expression(paste("Wald with ", tilde(phi))), expression(tilde(italic(t))), 
             expression(tilde(italic(t))^list("*")))) +
     theme_bw() +
@@ -415,7 +436,9 @@ ggplot(typeI %>% filter(parameter != 1, is.element(statistic,
 ```
 
 # Scale adjustment via bootstrap
-The following figure shows how precise the testing accuracy of the location- and scale-adjusted statistic $t^{**}$ obtained via parametric bootstrap is, further enhancing the performance of $t^*$.
+The following figure shows how precise the testing accuracy of the location- and 
+scale-adjusted statistic $t^{**}$ obtained via parametric bootstrap is, further 
+enhancing the performance of $t^*$.
 
 ```{r fig_boot, echo = TRUE, fig.height = 4, fig.width = 7, fig.align = "center", message = FALSE, warning = FALSE}
 ggplot(typeI %>% filter(parameter != 1, is.element(statistic, 
@@ -430,7 +453,8 @@ ggplot(typeI %>% filter(parameter != 1, is.element(statistic,
                      labels = c(expression(beta[2]),
                        expression(beta[3]),
                        expression(beta[4]))) +
-  scale_y_continuous(name = expression(paste("Empirical rejection probability (", symbol('\045'), ")")),
+  scale_y_continuous(name = expression(paste("Empirical rejection probability 
+                                             (", symbol('\045'), ")")),
                      labels = function (x) {
                        if (length(x) == 0)
                          return(character())
@@ -438,8 +462,10 @@ ggplot(typeI %>% filter(parameter != 1, is.element(statistic,
                        scales:::comma(x * 100)
                      }) +
   theme_bw() +
-  scale_shape_manual(name = " ", values = c(16, 17, 15, 18), labels = c(expression(italic(t)), expression(italic(t)^list("*")), 
-            expression(paste("Wald with ", tilde(phi))),  expression(italic(t)^list("**")))) +
+  scale_shape_manual(name = " ", values = c(16, 17, 15, 18), 
+              labels = c(expression(italic(t)), expression(italic(t)^list("*")), 
+            expression(paste("Wald with ", tilde(phi))),  
+            expression(italic(t)^list("**")))) +
   theme(legend.position = "top",
         panel.grid.major.y = element_blank(),
         panel.grid.minor.y = element_blank(),
@@ -499,7 +525,10 @@ round(matrix(c(out1, out2), ncol = 10, byrow = TRUE,
 ```
 
 # Figure 4
-`babies_simulation.rda` below is the output of [`babies_simulation.R`](`r paste(code_path, "babies_simulation.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Section 9.4 of @dicaterina+kosmidis:2017.
+`babies_simulation.rda` below is the output of 
+[`babies_simulation.R`](`r paste(code_path, "babies_simulation.R", sep = "/")`) 
+in `r code_path`, which replicates the simulation study described in Section 9.4 
+of @dicaterina+kosmidis:2017.
 ```{r, warning = FALSE}
 load(paste(results_path, "babies_simulation.rda", sep = "/"))
 
@@ -574,7 +603,10 @@ ggplot(pval) +
 ```
 
 # Figure 5
-`brains_case_study.rda` below is the output of [`brains_case_study.R`](`r paste(code_path, "brains_case_study.R", sep = "/")`) in `r code_path`, which replicates the simulation study described in Section 10 of @dicaterina+kosmidis:2017.
+`brains_case_study.rda` below is the output of 
+[`brains_case_study.R`](`r paste(code_path, "brains_case_study.R", sep = "/")`) 
+in `r code_path`, which replicates the simulation study described in Section 10 
+of @dicaterina+kosmidis:2017.
 ```{r}
 source(paste0(code_path, "/", "overlay2_nifti.R"))
 load(paste(results_path, "brains_case_study.rda", sep = "/"))
@@ -654,7 +686,8 @@ ggplot(v) +
     labs(x = expression(tilde(italic(t))), y = expression(tilde(italic(t))^'*'))
 ```
 
-# Timings in Concluding Remarks
+# Execution times
+## Timings in Concluding Remarks
 ```{r}
 numerical_time <- system.time(
     numerical <- waldi(babies_ml, numerical = TRUE, which = 19)
@@ -665,10 +698,46 @@ analytic_time <- system.time(
 (numerical_time/analytic_time)["elapsed"]
 ```
 
+## Computational times and parallelization
+`babies_times.rda` below is the output of 
+[`babies_times.R`](`r paste(code_path, "babies_times.R", sep = "/")`) 
+in `r code_path`. The figure illustrates the computational gain of using 
+analytical derivatives in the calculation of the location-adjusted statistics
+with null value 0 for all 19 parameters in model (22) of the manuscript. When 
+derivatives are obtained numerically, it is shown how the execution time 
+decreases with the number of cores employed in the parallel implementation 
+performed by the **waldi** R package.
+```{r}
+load(paste(results_path, "babies_times.rda", sep = "/"))
+
+times_ana <- sapply(out_ana, function(x) rowMeans(x)["elapsed"])
+times_num <- sapply(out_num, function(x) rowMeans(x)["elapsed"])
+cores <- seq_along(out_num)
+res <- data.frame(times = c(times_ana, times_num), 
+		   cores = c(cores, cores), 
+		   derivatives = rep(c("analytical", "numerical"), each = length(cores)))
+
+ggplot(res) +  
+   geom_line(aes(x = cores, y = times, lty = derivatives)) +
+   geom_point(aes(x = cores, y = times)) +
+   theme_minimal() +
+   labs(x = "cores", y = "elapsed time (sec)")
+```
+
 # Meta-regression and meta-analysis
 ## Wald statistics
 
-The random-effects meta-regression model, i.e. the extension to random-effects meta-analysis for combining information from $K$ studies about a common effect of interest (DerSimonian and Laird, 1986), assumes that $Y_1,\dots,Y_n$ are independent random variables conditionally on independent random effects $U_1,\dots,U_K$. The conditional distribution of $Y_i$ given $x_i$ and $U_i=u_i$ is $N(u_i+x_i^\top\beta, \hat{\sigma}^2_i)$, where $\hat{\sigma}^2_i$ is the known within-study variance and $u_i$ is the realization of a $N(0, \psi)$. The unknown parameters are the $k$-vector of effects $\beta$ and the between-study heterogeneity $\psi$. Note that this specification reduces to the meta-analysis model if $x_i=1$ for every $i=1,\dots,K$. The expected information matrix depends only on $\psi$ and is
+The random-effects meta-regression model, i.e. the extension to random-effects 
+meta-analysis for combining information from $K$ studies about a common effect 
+of interest (DerSimonian and Laird, 1986), assumes that $Y_1,\dots,Y_n$ are 
+independent random variables conditionally on independent random effects 
+$U_1,\dots,U_K$. The conditional distribution of $Y_i$ given $x_i$ and $U_i=u_i$ 
+is $N(u_i+x_i^\top\beta, \hat{\sigma}^2_i)$, where $\hat{\sigma}^2_i$ is the 
+known within-study variance and $u_i$ is the realization of a $N(0, \psi)$. 
+The unknown parameters are the $k$-vector of effects $\beta$ and the between-study 
+heterogeneity $\psi$. Note that this specification reduces to the meta-analysis 
+model if $x_i=1$ for every $i=1,\dots,K$. The expected information matrix depends 
+only on $\psi$ and is
 
 \begin{equation}
 \label{eq:infometa}
@@ -679,14 +748,28 @@ X^\top W(\psi) X & 0_k \\
 \end{array}
 \right]\,,
 \end{equation}
-where $W(\psi)=\mathrm{diag}\{w_1,\dots,w_n\}$, with $w_i=(\hat{\sigma}^2_i+\psi)^{-1}$. Thus, the Wald statistic for testing $H_0:\beta_j=\beta_{j0}$ takes the form $t_j = (\hat\beta_j - \beta_{j0})/\kappa_j(\hat\psi)$ $(j=1,\dots,k)$, and can be seen as the estimate of the transformation $T_j(\beta, \psi; \beta_{j0}) = (\beta_j -
-\beta_{j0})/\kappa_j(\psi)$, where $\kappa_j(\psi) = [\{X^\top W(\psi)X\}^{-1}]_{jj}^{1/2}$.
+where $W(\psi)=\mathrm{diag}\{w_1,\dots,w_n\}$, with $w_i=(\hat{\sigma}^2_i+\psi)^{-1}$. 
+Thus, the Wald statistic for testing $H_0:\beta_j=\beta_{j0}$ takes the form 
+$t_j = (\hat\beta_j - \beta_{j0})/\kappa_j(\hat\psi)$ $(j=1,\dots,k)$, and can 
+be seen as the estimate of the transformation 
+$T_j(\beta, \psi; \beta_{j0}) = (\beta_j -\beta_{j0})/\kappa_j(\psi)$, 
+where $\kappa_j(\psi) = [\{X^\top W(\psi)X\}^{-1}]_{jj}^{1/2}$.
 
-@guolo15 provide extensive evidence that Wald and other first-order likelihood-based procedures can be highly inaccurate when the number of studies is small or moderate. In these cases, Kosmidis et al. (2017) \nocite{@kosetal17}illustrate that the downward bias of the maximum likelihood estimator $\hat{\psi}$ affects conclusions on $\beta$, leading to anti-conservative tests and narrow confidence intervals, and propose asymptotic bias reduction as a means to refine first-order inference about the mean effect size.
+@guolo15 provide extensive evidence that Wald and other first-order likelihood-based 
+procedures can be highly inaccurate when the number of studies is small or moderate. 
+In these cases, Kosmidis et al. (2017) \nocite{@kosetal17}illustrate that the 
+downward bias of the maximum likelihood estimator $\hat{\psi}$ affects conclusions on 
+$\beta$, leading to anti-conservative tests and narrow confidence intervals, and 
+propose asymptotic bias reduction as a means to refine first-order inference about 
+the mean effect size.
 
 ## Implementation
-The calculation of the location-adjusted Wald statistic for the simulation studies is done analytically using the formula for the first-order bias of $\hat\psi$, namely $b_\psi(\psi)=-\mathrm{tr}\{W(\psi)H(\psi)\}/\mathrm{tr}\{W(\psi)^2\}$ where $H(\psi)=X\{X^\top W(\psi)X\}^{-1}X^\top W(\psi)$ (Kosmidis et al., 2017, equation (5)), the derivatives of $T_{j}(\beta, \psi; \beta_{j0})$, and the expression of the information matrix $i(\psi)$.
-The partial derivatives of the latter with respect to $\beta$ are zero, while
+The calculation of the location-adjusted Wald statistic for the simulation studies is 
+done analytically using the formula for the first-order bias of $\hat\psi$, namely $b_\psi(\psi)=-\mathrm{tr}\{W(\psi)H(\psi)\}/\mathrm{tr}\{W(\psi)^2\}$ where 
+$H(\psi)=X\{X^\top W(\psi)X\}^{-1}X^\top W(\psi)$ (Kosmidis et al., 2017, equation (5)), 
+the derivatives of $T_{j}(\beta, \psi; \beta_{j0})$, and the expression of the 
+information matrix $i(\psi)$. The partial derivatives of the latter with respect to 
+$\beta$ are zero, while
 
 \begin{equation*}
 \label{eq:der1ps}
@@ -707,11 +790,25 @@ X^\top W''(\psi) X & 0_k \\
 \end{array}
 \right]\,,
 \end{equation*}
-where $W'(\psi)=\mathrm{diag}\{w'_1,\dots,w'_n\}$, with $w'_i=-(\hat{\sigma}^2_i+\psi)^{-2}$ and
-$W''(\psi)=\mathrm{diag}\{w''_1,\dots,w''_n\}$, with $w''_i=2(\hat{\sigma}^2_i+\psi)^{-3}$.
+where $W'(\psi)=\mathrm{diag}\{w'_1,\dots,w'_n\}$, 
+with $w'_i=-(\hat{\sigma}^2_i+\psi)^{-2}$ and
+$W''(\psi)=\mathrm{diag}\{w''_1,\dots,w''_n\}$, 
+with $w''_i=2(\hat{\sigma}^2_i+\psi)^{-3}$.
 
 ## Simulation studies
-This section illustrates results of the simulations performed under the random-effects meta-analysis model using the same design as in @brockwell+gordon:2001. In particular, the realizations $y_i$ are simulated from a meta-analysis model with $\beta = 0.5$ and variance $\hat\sigma_i+\psi$, where $\hat\sigma_i$ are independently generated from a $\chi^2_1$ distribution multiplied by 0.25 and then restricted to the interval (0.009, 0.6). The parameter $\psi$ ranges from 0 to 0.1, and the number of studies $K$ from 5 to 200. Due to long execution times, we have ran the experiment based on 10 000 Monte Carlo iterations for only those combinations of $\psi$ and $K$ which are needed to reproduce below Figure 1 of Kosmidis et al. (2017).
+This section illustrates results of the simulations performed under the 
+random-effects meta-analysis model using the same design as in @brockwell+gordon:2001. 
+In particular, the realizations $y_i$ are simulated from a meta-analysis model with 
+$\beta = 0.5$ and variance $\hat\sigma_i+\psi$, where $\hat\sigma_i$ are independently 
+generated from a $\chi^2_1$ distribution multiplied by 0.25 and then restricted to the 
+interval (0.009, 0.6). The parameter $\psi$ ranges from 0 to 0.1, and the number of 
+studies $K$ from 5 to 200. Due to long execution times, we have ran the experiment 
+based on 10 000 Monte Carlo iterations for only those combinations of $\psi$ and $K$ 
+which are needed to reproduce below Figure 1 of Kosmidis et al. (2017).
+
+Note that `meta_analysis_simulation.rda` below is the output of 
+[`meta_analysis_simulation.R`](`r paste(code_path, "meta_analysis_simulation.R", sep = "/")`) 
+in `r code_path`.
 
 ```{r metareg, echo = TRUE, message = FALSE, warning = FALSE}
 load(paste(results_path, "meta_analysis_simulation.rda", sep = "/"))
@@ -727,7 +824,8 @@ fig1 <- ggplot(cov_df_K  %>% filter(test == "2sided")) +
                      labels = c("0.00", "0.02", "0.04", "0.06", "0.08", "0.10")) +
   scale_colour_manual(name = "", values = c("#328900", "#0080C5", "#C54E6D", "purple", 
         "orange", 4), labels = c(expression(italic(t)), expression(italic(t)^list("*")), 
-        expression(tilde(italic(t))), expression(tilde(italic(t))^list("*")), "DL", "ZL")) +
+        expression(tilde(italic(t))), 
+        expression(tilde(italic(t))^list("*")), "DL", "ZL")) +
   theme_bw() +
   theme(legend.position = "top", panel.grid.major.y = element_blank(), 
         panel.grid.minor.y = element_blank(), panel.grid.minor.x = element_blank(), 
@@ -736,16 +834,19 @@ fig1 <- ggplot(cov_df_K  %>% filter(test == "2sided")) +
 
 ## plot psi = 0.03, 0.07
 fig2 <- ggplot(cov_df_psi  %>% filter(test == "2sided")) +
-  geom_line(aes(log(K), cov, group = statistic, col = statistic), size = 0.5, alpha = 0.8) +
+  geom_line(aes(log(K), cov, group = statistic, col = statistic), size = 0.5, 
+            alpha = 0.8) +
   geom_hline(aes(yintercept = 95), col = "grey") +
   facet_wrap( ~ psilab, labeller = label_parsed, scales = "free") +
   labs(y = "Coverage probability (%)", x = expression(italic(K))) +
   lims(y = c(80, 100)) +
-  scale_x_continuous(name = expression(italic(K)), breaks = c(log(5), log(10), log(25), log(50), 
-                    log(100), log(200)), labels = c("5", "10", "25", "50", "100", "200")) +
-  scale_colour_manual(name = "", values = c("#328900", "#0080C5", "#C54E6D", "purple", 
-            "orange", 4), labels = c(expression(italic(t)), expression(italic(t)^list("*")), 
-            expression(tilde(italic(t))), expression(tilde(italic(t))^list("*")), "DL", "ZL")) +
+  scale_x_continuous(name = expression(italic(K)), breaks = c(log(5), log(10), 
+                    log(25), log(50), log(100), log(200)), labels = 
+                      c("5", "10", "25", "50", "100", "200")) +
+  scale_colour_manual(name = "", values = c("#328900", "#0080C5", "#C54E6D", 
+                      "purple", "orange", 4), labels = c(expression(italic(t)), 
+                      expression(italic(t)^list("*")), expression(tilde(italic(t))), 
+                      expression(tilde(italic(t))^list("*")), "DL", "ZL")) +
   theme_bw() +
   theme(legend.position = "none", panel.grid.major.y = element_blank(), 
         panel.grid.minor.y = element_blank(), panel.grid.minor.x = element_blank(), 
@@ -759,9 +860,24 @@ print(fig2)
 ```
 
 
-The last plots show the empirical coverage probabilities of individual confidence intervals for $\beta$, as $\psi$ varies when $K \in \{10, 20\}$ (top row) and as $K$ increases (in $\log$ scale) when $\psi\in \{0.03, 0.07\}$ (bottom row). The curves correspond to $t$, $t^*$, $\tilde{t}$, $\tilde{t}^*$, the Wald statistic based on the DerSimonian \& Laird estimator (DL) and, for $K \leq 50$, the Zeng \& Lin double-resampling method (ZL). The grey horizontal line is the target 95\% nominal level.
+The last plots show the empirical coverage probabilities of individual confidence 
+intervals for $\beta$, as $\psi$ varies when $K \in \{10, 20\}$ (top row) and as 
+$K$ increases (in $\log$ scale) when $\psi\in \{0.03, 0.07\}$ (bottom row). The 
+curves correspond to $t$, $t^*$, $\tilde{t}$, $\tilde{t}^*$, the Wald statistic 
+based on the DerSimonian \& Laird estimator (DL) and, for $K \leq 50$, the Zeng \& 
+Lin double-resampling method (ZL). The grey horizontal line is the target 95\% 
+nominal level.
 
-The inversion of the location-adjusted Wald statistic, both that based on maximum likelihood and that based on reduced-bias estimates, results in intervals with empirical coverage that is remarkably close to the nominal level in all scenarios. Whereas the adoption of $\tilde{t}$ produces an improvement over $t$ which is similar to that implied by using the DerSimonian \& Laird estimator of $\psi$ (DerSimonian and Laird, 1986) in the standard Wald statistic, the adjustment in location performed through $t^*$ and $\tilde{t}^*$ proves to be even more effective than the double resampling, despite the significantly higher computational intensity of the approach proposed by Zeng \& Lin (2015).
+The inversion of the location-adjusted Wald statistic, both that based on 
+maximum likelihood and that based on reduced-bias estimates, results in 
+intervals with empirical coverage that is remarkably close to the nominal 
+level in all scenarios. Whereas the adoption of $\tilde{t}$ produces an 
+improvement over $t$ which is similar to that implied by using the DerSimonian 
+\& Laird estimator of $\psi$ (DerSimonian and Laird, 1986) in the standard Wald 
+statistic, the adjustment in location performed through $t^*$ and $\tilde{t}^*$ 
+proves to be even more effective than the double resampling, despite the 
+significantly higher computational intensity of the approach proposed by 
+Zeng \& Lin (2015).
 
 # References
 
